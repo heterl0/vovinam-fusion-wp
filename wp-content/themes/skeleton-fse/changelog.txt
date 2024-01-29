@@ -1,0 +1,11 @@
+= 1.3 =
+* Added Green Style Combination in Styles. 
+
+= 1.2 =
+* Added Team Members Patterns. 
+
+= 1.1 =
+* Resolved both issue which reviewer pointed.
+
+= 1.0 =
+* Initial version release.

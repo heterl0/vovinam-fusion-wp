@@ -1,0 +1,38 @@
+2024-01-27T09:46:34+00:00 CRITICAL Uncaught Elementor\Data\V2\Base\Exceptions\WP_Error_Exception: Method 'WP_REST_Controller::get_item_permissions_check' not implemented. Must be overridden in subclass. in /var/www/heterl0.me/wordpress/wp-content/plugins/elementor/data/v2/base/controller.php:227
+Stack trace:
+#0 /var/www/heterl0.me/wordpress/wp-content/plugins/elementor/data/v2/base/base-route.php(105): Elementor\Data\V2\Base\Controller->get_permission_callback()
+#1 /var/www/heterl0.me/wordpress/wp-content/plugins/elementor/data/v2/base/base-route.php(242): Elementor\Data\V2\Base\Base_Route->get_permission_callback()
+#2 /var/www/heterl0.me/wordpress/wp-includes/rest-api/class-wp-rest-server.php(1160): Elementor\Data\V2\Base\Base_Route->Elementor\Data\V2\Base\{closure}()
+#3 /var/www/heterl0.me/wordpress/wp-includes/rest-api/class-wp-rest-server.php(1041): WP_REST_Server->respond_to_request()
+#4 /var/www/heterl0.me/wordpress/wp-includes/rest-api/class-wp-rest-server.php(431): WP_REST_Server->dispatch()
+#5 /var/www/heterl0.me/wordpress/wp-includes/rest-api.php(424): WP_REST_Server->serve_request()
+#6 /var/www/heterl0.me/wordpress/wp-includes/class-wp-hook.php(324): rest_api_loaded()
+#7 /var/www/heterl0.me/wordpress/wp-includes/class-wp-hook.php(348): WP_Hook->apply_filters()
+#8 /var/www/heterl0.me/wordpress/wp-includes/plugin.php(565): WP_Hook->do_action()
+#9 /var/www/heterl0.me/wordpress/wp-includes/class-wp.php(418): do_action_ref_array()
+#10 /var/www/heterl0.me/wordpress/wp-includes/class-wp.php(813): WP->parse_request()
+#11 /var/www/heterl0.me/wordpress/wp-includes/functions.php(1336): WP->main()
+#12 /var/www/heterl0.me/wordpress/wp-blog-header.php(16): wp()
+#13 /var/www/heterl0.me/wordpress/index.php(17): require('...')
+#14 {main}
+  thrown in /var/www/heterl0.me/wordpress/wp-content/plugins/elementor/data/v2/base/controller.php on line 227
+
+2024-01-27T10:56:45+00:00 CRITICAL Uncaught Elementor\Data\V2\Base\Exceptions\WP_Error_Exception: Method 'WP_REST_Controller::get_item_permissions_check' not implemented. Must be overridden in subclass. in /var/www/heterl0.me/wordpress/wp-content/plugins/elementor/data/v2/base/controller.php:227
+Stack trace:
+#0 /var/www/heterl0.me/wordpress/wp-content/plugins/elementor/data/v2/base/base-route.php(105): Elementor\Data\V2\Base\Controller->get_permission_callback()
+#1 /var/www/heterl0.me/wordpress/wp-content/plugins/elementor/data/v2/base/base-route.php(242): Elementor\Data\V2\Base\Base_Route->get_permission_callback()
+#2 /var/www/heterl0.me/wordpress/wp-includes/rest-api/class-wp-rest-server.php(1160): Elementor\Data\V2\Base\Base_Route->Elementor\Data\V2\Base\{closure}()
+#3 /var/www/heterl0.me/wordpress/wp-includes/rest-api/class-wp-rest-server.php(1041): WP_REST_Server->respond_to_request()
+#4 /var/www/heterl0.me/wordpress/wp-includes/rest-api/class-wp-rest-server.php(431): WP_REST_Server->dispatch()
+#5 /var/www/heterl0.me/wordpress/wp-includes/rest-api.php(424): WP_REST_Server->serve_request()
+#6 /var/www/heterl0.me/wordpress/wp-includes/class-wp-hook.php(324): rest_api_loaded()
+#7 /var/www/heterl0.me/wordpress/wp-includes/class-wp-hook.php(348): WP_Hook->apply_filters()
+#8 /var/www/heterl0.me/wordpress/wp-includes/plugin.php(565): WP_Hook->do_action()
+#9 /var/www/heterl0.me/wordpress/wp-includes/class-wp.php(418): do_action_ref_array()
+#10 /var/www/heterl0.me/wordpress/wp-includes/class-wp.php(813): WP->parse_request()
+#11 /var/www/heterl0.me/wordpress/wp-includes/functions.php(1336): WP->main()
+#12 /var/www/heterl0.me/wordpress/wp-blog-header.php(16): wp()
+#13 /var/www/heterl0.me/wordpress/index.php(17): require('...')
+#14 {main}
+  thrown in /var/www/heterl0.me/wordpress/wp-content/plugins/elementor/data/v2/base/controller.php on line 227
+
