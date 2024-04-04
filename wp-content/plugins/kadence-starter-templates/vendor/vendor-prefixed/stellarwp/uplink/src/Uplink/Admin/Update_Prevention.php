@@ -2,7 +2,7 @@
 /**
  * @license GPL-2.0-or-later
  *
- * Modified by kadencewp on 10-January-2024 using Strauss.
+ * Modified by kadencewp on 05-February-2024 using Strauss.
  * @see https://github.com/BrianHenryIE/strauss
  */ declare( strict_types=1 );
 
@@ -63,7 +63,7 @@ class Update_Prevention {
 	 *
 	 * @return string|WP_Error
 	 */
-	public function filter_upgrader_source_selection( string $source, $remote_source, WP_Upgrader $upgrader, array $extras ) {
+	public function filter_upgrader_source_selection( $source, $remote_source, WP_Upgrader $upgrader, array $extras ) {
 		if ( ! isset( $extras['plugin'] ) ) {
 			return $source;
 		}

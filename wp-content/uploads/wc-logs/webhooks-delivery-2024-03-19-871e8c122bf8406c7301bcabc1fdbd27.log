@@ -1,0 +1,53 @@
+2024-03-19T10:19:05+00:00 INFO Array
+(
+    [Webhook Delivery] => Array
+        (
+            [Delivery ID] => 6bc3ee9078a66d7f63530c55a3c67f85
+            [Date] => Th3 19, 2024 @ 10:19
+            [URL] => https://vn1.n8n.vn/webhook/test/order/updated
+            [Duration] => 0.48425
+            [Request] => Array
+                (
+                    [Method] => POST
+                    [Headers] => Array
+                        (
+                            [User-Agent] => WooCommerce/8.6.1 Hookshot (WordPress/6.4.2)
+                            [Content-Type] => application/json
+                            [X-WC-Webhook-Source] => https://vovinamfusion.top/
+                            [X-WC-Webhook-Topic] => order.updated
+                            [X-WC-Webhook-Resource] => order
+                            [X-WC-Webhook-Event] => updated
+                            [X-WC-Webhook-Signature] => Xcx/zesd5Tcj3KojgJHNxeEw7HDmWi0Rggg4My8eXXA=
+                            [X-WC-Webhook-ID] => 2
+                            [X-WC-Webhook-Delivery-ID] => 6bc3ee9078a66d7f63530c55a3c67f85
+                        )
+
+                )
+
+            [Body] => Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.
+            [Response] => Array
+                (
+                    [Code] => 200
+                    [Message] => OK
+                    [Headers] => WpOrg\Requests\Utility\CaseInsensitiveDictionary Object
+                        (
+                            [data:protected] => Array
+                                (
+                                    [content-length] => 34
+                                    [content-type] => application/json; charset=utf-8
+                                    [date] => Tue, 19 Mar 2024 10:19:05 GMT
+                                    [etag] => W/"22-6OS7cK0FzqnV2NeDHdOSGS1bVUs"
+                                    [strict-transport-security] => max-age=315360000; includeSubDomains; preload
+                                    [vary] => Accept-Encoding
+                                    [x-content-type-options] => nosniff
+                                    [x-xss-protection] => 1; mode=block
+                                )
+
+                        )
+
+                    [Body] => Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.
+                )
+
+        )
+
+)

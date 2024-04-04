@@ -106,6 +106,19 @@ class Admin {
 		add_filter( 'language_attributes', [ $this, 'alwaysAddHtmlDirAttribute' ], 3000 );
 
 		add_action( 'sanitize_comment_cookies', [ $this, 'init' ], 20 );
+
+		add_action( 'admin_menu', [ $this, 'deactivationSurvey' ], 100 );
+	}
+
+	/**
+	 * Runs the deactivation survey.
+	 *
+	 * @since 4.5.5
+	 *
+	 * @return void
+	 */
+	public function deactivationSurvey() {
+		new DeactivationSurvey( AIOSEO_PLUGIN_NAME, dirname( plugin_basename( AIOSEO_FILE ) ) );
 	}
 
 	/**
@@ -671,6 +684,14 @@ class Admin {
 			];
 		}
 
+		if ( current_user_can( $this->getPageRequiredCapability( 'aioseo-search-appearance' ) ) ) {
+			$submenu['users.php'][] = [
+				esc_html__( 'Author SEO', 'all-in-one-seo-pack' ),
+				$this->getPageRequiredCapability( 'aioseo-search-appearance' ),
+				admin_url( '/admin.php?page=aioseo-search-appearance/#author-seo' )
+			];
+		}
+
 		// We use the global submenu, because we are adding an external link here.
 		$count         = count( Models\Notification::getAllActiveNotifications() );
 		$firstPageSlug = $this->getFirstAvailablePageSlug();
@@ -758,7 +779,7 @@ class Admin {
 	 * @return void
 	 */
 	public function hooks() {
-		$currentScreen = function_exists( 'get_current_screen' ) ? get_current_screen() : false;
+		$currentScreen = aioseo()->helpers->getCurrentScreen();
 		global $admin_page_hooks;
 
 		if ( ! is_object( $currentScreen ) || empty( $currentScreen->id ) || empty( $admin_page_hooks ) ) {
@@ -874,7 +895,8 @@ class Admin {
 	 * @return bool Whether the current page is an AIOSEO menu page.
 	 */
 	public function isAioseoScreen() {
-		if ( ! function_exists( 'get_current_screen' ) ) {
+		$currentScreen = aioseo()->helpers->getCurrentScreen();
+		if ( empty( $currentScreen->id ) ) {
 			return false;
 		}
 
@@ -886,8 +908,6 @@ class Admin {
 
 			return 'all-in-one-seo_page_' . $slug;
 		}, $adminPages );
-
-		$currentScreen = get_current_screen();
 
 		return in_array( $currentScreen->id, $adminPages, true );
 	}

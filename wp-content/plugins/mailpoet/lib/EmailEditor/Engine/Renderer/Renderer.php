@@ -6,22 +6,20 @@ if (!defined('ABSPATH')) exit;
 
 
 use MailPoet\EmailEditor\Engine\SettingsController;
+use MailPoet\EmailEditor\Engine\ThemeController;
 use MailPoet\Util\pQuery\DomNode;
 use MailPoetVendor\Html2Text\Html2Text;
 
 class Renderer {
+  private \MailPoetVendor\CSS $cssInliner;
 
-  /** @var \MailPoetVendor\CSS */
-  private $cssInliner;
+  private BlocksRegistry $blocksRegistry;
 
-  /** @var BlocksRegistry */
-  private $blocksRegistry;
+  private ProcessManager $processManager;
 
-  /** @var PreprocessManager */
-  private $preprocessManager;
+  private SettingsController $settingsController;
 
-  /** @var SettingsController */
-  private $settingsController;
+  private ThemeController $themeController;
 
   const TEMPLATE_FILE = 'template.html';
   const TEMPLATE_STYLES_FILE = 'styles.css';
@@ -31,35 +29,39 @@ class Renderer {
    */
   public function __construct(
     \MailPoetVendor\CSS $cssInliner,
-    PreprocessManager $preprocessManager,
+    ProcessManager $preprocessManager,
     BlocksRegistry $blocksRegistry,
-    SettingsController $settingsController
+    SettingsController $settingsController,
+    ThemeController $themeController
   ) {
     $this->cssInliner = $cssInliner;
-    $this->preprocessManager = $preprocessManager;
+    $this->processManager = $preprocessManager;
     $this->blocksRegistry = $blocksRegistry;
     $this->settingsController = $settingsController;
+    $this->themeController = $themeController;
   }
 
   public function render(\WP_Post $post, string $subject, string $preHeader, string $language, $metaRobots = ''): array {
     $parser = new \WP_Block_Parser();
     $parsedBlocks = $parser->parse($post->post_content); // phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
 
-    $layoutStyles = $this->settingsController->getEmailLayoutStyles();
+    $layoutStyles = $this->settingsController->getEmailStyles()['layout'];
     $themeData = $this->settingsController->getTheme()->get_data();
     $contentBackground = $themeData['styles']['color']['background'] ?? $layoutStyles['background'];
-    $parsedBlocks = $this->preprocessManager->preprocess($parsedBlocks, $layoutStyles);
+    $contentFontFamily = $themeData['styles']['typography']['fontFamily'];
+    $parsedBlocks = $this->processManager->preprocess($parsedBlocks, $layoutStyles);
     $renderedBody = $this->renderBlocks($parsedBlocks);
 
     $styles = (string)file_get_contents(dirname(__FILE__) . '/' . self::TEMPLATE_STYLES_FILE);
+    $styles .= $this->themeController->getStylesheetForRendering();
     $styles = apply_filters('mailpoet_email_renderer_styles', $styles, $post);
 
     $template = (string)file_get_contents(dirname(__FILE__) . '/' . self::TEMPLATE_FILE);
 
-    // Apply layout styles
+    // Replace style settings placeholders with values
     $template = str_replace(
-      ['{{width}}', '{{layout_background}}', '{{content_background}}', '{{padding_top}}', '{{padding_right}}', '{{padding_bottom}}', '{{padding_left}}'],
-      [$layoutStyles['width'], $layoutStyles['background'], $contentBackground, $layoutStyles['padding']['top'], $layoutStyles['padding']['right'], $layoutStyles['padding']['bottom'], $layoutStyles['padding']['left']],
+      ['{{width}}', '{{layout_background}}', '{{content_background}}', '{{content_font_family}}', '{{padding_top}}', '{{padding_right}}', '{{padding_bottom}}', '{{padding_left}}'],
+      [$layoutStyles['width'], $layoutStyles['background'], $contentBackground, $contentFontFamily, $layoutStyles['padding']['top'], $layoutStyles['padding']['right'], $layoutStyles['padding']['bottom'], $layoutStyles['padding']['left']],
       $template
     );
 
@@ -86,6 +88,7 @@ class Renderer {
 
     $templateWithContentsDom = $this->inlineCSSStyles($templateWithContents);
     $templateWithContents = $this->postProcessTemplate($templateWithContentsDom);
+    $templateWithContents = $this->processManager->postprocess($templateWithContents);
     return [
       'html' => $templateWithContents,
       'text' => $this->renderTextVersion($templateWithContents),
@@ -110,7 +113,7 @@ class Renderer {
   }
 
   private function injectContentIntoTemplate($template, array $content) {
-    return preg_replace_callback('/{{\w+}}/', function($matches) use (&$content) {
+    return preg_replace_callback('/{{\w+}}/', function ($matches) use (&$content) {
       return array_shift($content);
     }, $template);
   }
@@ -137,10 +140,6 @@ class Renderer {
    * @return string
    */
   private function postProcessTemplate(DomNode $templateDom) {
-    // replace spaces in image tag URLs
-    foreach ($templateDom->query('img') as $image) {
-      $image->src = str_replace(' ', '%20', $image->src);
-    }
     // because tburry/pquery contains a bug and replaces the opening non mso condition incorrectly we have to replace the opening tag with correct value
     $template = $templateDom->__toString();
     $template = str_replace('<!--[if !mso]><![endif]-->', '<!--[if !mso]><!-- -->', $template);

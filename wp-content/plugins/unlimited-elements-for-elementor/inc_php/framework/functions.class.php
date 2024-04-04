@@ -43,17 +43,17 @@ class UniteFunctionsUC{
 		echo "</pre>";
 
 	}
-	
+
 	/**
 	 * show some class static variables values
 	 */
 	public static function showClassStaticVariables($className){
-		
+
 		 $reflectionClass = new ReflectionClass($className);
 		 $staticProperties = $reflectionClass->getStaticProperties();
 		 dmp($staticProperties);
 	}
-	
+
 
 	/**
 	 * throw error and show function trace
@@ -472,17 +472,19 @@ class UniteFunctionsUC{
 	/**
 	 * encode json for html data like data-key="json"
 	 */
-	public static function jsonEncodeForHtmlData($arr, $dataKey=""){
+	public static function jsonEncodeForHtmlData($value, $key = ""){
 
-		$strJson = "";
-		if(!empty($arr)){
-			$strJson = json_encode($arr);
-			$strJson = htmlspecialchars($strJson);
+		$data = "";
+
+		if(empty($value) === false){
+			$data = json_encode($value);
+			$data = htmlspecialchars($data, ENT_QUOTES);
 		}
-		if(!empty($dataKey))
-			$strJson = " data-{$dataKey}=\"{$strJson}\"";
 
-		return($strJson);
+		if(empty($key) === false)
+			$data = " data-$key=\"$data\"";
+
+		return $data;
 	}
 
 
@@ -1643,79 +1645,10 @@ class UniteFunctionsUC{
 		}
 
 
-	public static function z__________URLS__________(){}
-
-	/**
-	 *
-	 * get url contents
-	 */
-	public static function getUrlContents($url,$arrPost=array(),$method = "post",$debug=false){
-
-		$ch = curl_init();
-		$timeout = 0;
-
-		if(empty($arrPost))
-			$arrPost = array();
-
-		$strPost = '';
-		foreach($arrPost as $key=>$value){
-			if(!empty($strPost))
-				$strPost .= "&";
-
-			if(is_array($value))
-				$value = json_encode($value);
-
-			$value = urlencode($value);
-			$strPost .= "$key=$value";
-		}
-
-		//set curl options
-		if(strtolower($method) == "post"){
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS,$strPost);
-		}
-		else{
-			if(!empty($strPost))
-				$url = self::addUrlParams($url, $strPost);
-		}
-
-
-		//remove me
-		//Functions::addToLogFile(SERVICE_LOG_SERVICE, "url", $url);
-
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-
-
-		$headers = array();
-		$headers[] = "User-Agent:Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8";
-		$headers[] = "Accept-Charset:utf-8;q=0.7,*;q=0.7";
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$response = curl_exec($ch);
-
-
-		if($debug == true){
-			dmp($url);
-			dmp($response);
-			exit();
-		}
-
-		if($response == false)
-			throw new Exception("getUrlContents Request failed");
-
-		curl_close($ch);
-		return($response);
-	}
-
+	public static function z__________URL__________(){}
 
 	/**
 	 * convert url to handle
-	 *
 	 */
 	public static function urlToHandle($url = ''){
 
@@ -1725,7 +1658,6 @@ class UniteFunctionsUC{
 		// Only allow one dash separator at a time (and make string lowercase)
 		return mb_strtolower(preg_replace('/--+/u', '-', $url), 'UTF-8');
 	}
-
 
 	/**
 	 * add params to url
@@ -2261,6 +2193,42 @@ class UniteFunctionsUC{
 	}
 
 	/**
+	 * write rolling log to file.
+	 * prepend content, cut max size from the end
+	 */
+	public static function writeRollingLogFile($pathLog, $arrLines, $maxSize = 30000){
+		
+		$strDate = self::timestamp2DateTime(null);
+		
+		$text = "";
+		$text .= "------------- $strDate -------------- \n\n";
+		
+		$delimiter = "\n\n";
+		
+		if(is_array($arrLines))
+			$lines = implode($delimiter, $arrLines);
+		else 
+			$lines = $arrLines;
+		
+		$text .= $lines;
+		
+		$text .= $delimiter;
+		
+		//prepend text
+		
+		$existingContent = file_get_contents($pathLog);
+
+		//cut from the end
+		
+		if(strlen($existingContent > $maxSize))
+			$existingContent = substr($existingContent, $maxSize);
+		
+		file_put_contents($pathLog, $text . $existingContent);		
+		
+	}
+	
+	
+	/**
 	 *
 	 * save some file to the filesystem with some text
 	 */
@@ -2795,13 +2763,35 @@ class UniteFunctionsUC{
 	/**
 	 * get time ago since now
 	 */
-	public static function getTimeAgoString($time_stamp){
-
+	public static function getTimeAgoString($time_stamp, $textFormat="long"){
+		
 		$time_difference = strtotime('now') - $time_stamp;
-
+				
+		$textHours = __('hours',"unlimited-elements-for-elementor"); 
+		$textHour = __('hour',"unlimited-elements-for-elementor");
+		
+		$textMunites = __('minutes',"unlimited-elements-for-elementor");
+		$textMunite = __('minute',"unlimited-elements-for-elementor");
+		
+		$textYears = __('years',"unlimited-elements-for-elementor");
+		$textYear = __('year',"unlimited-elements-for-elementor");
+		
+		$textWeeks = __('weeks',"unlimited-elements-for-elementor");
+		$textWeek = __('week',"unlimited-elements-for-elementor");
+		
+		
+		if($textFormat == "short"){
+			
+			$textHours = __('h',"unlimited-elements-for-elementor"); 
+			$textHour = __('h',"unlimited-elements-for-elementor");
+			$textMunites = __('min',"unlimited-elements-for-elementor");
+			$textMunite = __('min',"unlimited-elements-for-elementor");
+		}
+		
+		
 		//year
 		if ($time_difference >= 60 * 60 * 24 * 365.242199)
-			return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 365.242199, __('years',"unlimited-elements-for-elementor"),__('year',"unlimited-elements-for-elementor"));
+			return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 365.242199, $textYears, $textYear);
 
 		//month
 		if ($time_difference >= 60 * 60 * 24 * 30.4368499)
@@ -2809,7 +2799,7 @@ class UniteFunctionsUC{
 
 		//week
 		if ($time_difference >= 60 * 60 * 24 * 7)
-			return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 7, __('weeks',"unlimited-elements-for-elementor"),__('week',"unlimited-elements-for-elementor"));
+			return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 7, $textWeeks, $textWeek);
 
 		//day
 		if ($time_difference >= 60 * 60 * 24)
@@ -2817,10 +2807,10 @@ class UniteFunctionsUC{
 
 		//hour
 		if($time_difference >= 60 * 60)
-			return self::getTimeAgoStringUnit($time_stamp, 60 * 60, __('hours',"unlimited-elements-for-elementor") ,__('hour',"unlimited-elements-for-elementor"));
-
+			return self::getTimeAgoStringUnit($time_stamp, 60 * 60, $textHours , $textHour);
+		
 		//minute
-		return self::getTimeAgoStringUnit($time_stamp, 60, __('minutes',"unlimited-elements-for-elementor"),__('minute',"unlimited-elements-for-elementor"));
+		return self::getTimeAgoStringUnit($time_stamp, 60, $textMunites, $textMunite);
 	}
 
 
@@ -2854,12 +2844,20 @@ class UniteFunctionsUC{
 		$strTime = date("H:i",$stamp);
 		return($strTime);
 	}
-
+	
+	
 	/**
 	 * convert timestamp to date and time string
 	 */
-	public static function timestamp2DateTime($stamp){
-		$strDateTime = date("d M Y, H:i",$stamp);
+	public static function timestamp2DateTime($stamp = null){
+		
+		$dateString = "d M Y, H:i";
+		
+		if(empty($stamp))
+			$strDateTime = date($dateString);
+		else
+			$strDateTime = date("d M Y, H:i",$stamp);
+		
 		return($strDateTime);
 	}
 
@@ -2877,7 +2875,19 @@ class UniteFunctionsUC{
 
 
 	public static function z___________OTHERS__________(){}
-
+	
+	/**
+	 * check if max debug available
+	 * ?maxdebug=true
+	 */
+	public static function isMaxDebug(){
+		
+		$maxdebug = self::getGetVar("maxdebug","",self::SANITIZE_TEXT_FIELD);
+		
+		$maxdebug = self::strToBool($maxdebug);
+		
+		return($maxdebug == true);
+	}
 
 	/**
 	 * load xml file, get simplexml object back.
@@ -2962,7 +2972,7 @@ class UniteFunctionsUC{
 	public static function getYoutubeVideoID($url){
 
 		preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user|shorts)\/))([^\?&\"'>]+)/", $url, $matches);
-				
+
 		if(empty($matches))
 			return($url);
 
@@ -3194,15 +3204,19 @@ class UniteFunctionsUC{
 	 * convert string to boolean
 	 */
 	public static function strToBool($str){
+		
 		if(is_bool($str))
 			return($str);
-
+		
 		if(empty($str))
 			return(false);
 
 		if(is_numeric($str))
 			return($str != 0);
-
+		
+		if(is_string($str) == false)
+			return(false);
+		
 		$str = strtolower($str);
 		if($str == "true")
 			return(true);

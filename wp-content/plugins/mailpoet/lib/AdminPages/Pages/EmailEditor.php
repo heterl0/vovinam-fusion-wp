@@ -61,17 +61,19 @@ class EmailEditor {
         'api_version' => esc_js($apiVersion),
         'current_wp_user_email' => esc_js($currentUserEmail),
         'editor_settings' => $this->settingsController->getSettings(),
-        'email_layout_styles' => $this->settingsController->getEmailLayoutStyles(),
+        'email_styles' => $this->settingsController->getEmailStyles(),
         'editor_layout' => $this->settingsController->getLayout(),
       ]
     );
 
     // Load CSS from Post Editor
     $this->wp->wpEnqueueStyle('wp-edit-post');
+    // Load CSS for the format library - used for example in popover
+    $this->wp->wpEnqueueStyle('wp-format-library');
 
     // Enqueue media library scripts
     $this->wp->wpEnqueueMedia();
 
-    echo '<div id="mailpoet-email-editor"></div>';
+    echo '<div id="mailpoet-email-editor" class="block-editor"></div>';
   }
 }

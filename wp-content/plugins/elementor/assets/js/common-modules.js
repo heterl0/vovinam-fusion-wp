@@ -1,4 +1,4 @@
-/*! elementor - v3.18.0 - 20-12-2023 */
+/*! elementor - v3.20.0 - 11-03-2024 */
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -2182,7 +2182,6 @@ var ArgsObject = /*#__PURE__*/function (_InstanceType) {
    * @param {{}}     args
    *
    * @throws {Error}
-   *
    */
   (0, _createClass2.default)(ArgsObject, [{
     key: "requireArgument",
@@ -2203,7 +2202,6 @@ var ArgsObject = /*#__PURE__*/function (_InstanceType) {
      * @param {{}}     args
      *
      * @throws {Error}
-     *
      */
   }, {
     key: "requireArgumentType",
@@ -2225,7 +2223,6 @@ var ArgsObject = /*#__PURE__*/function (_InstanceType) {
      * @param {{}}     args
      *
      * @throws {Error}
-     *
      */
   }, {
     key: "requireArgumentInstance",
@@ -2247,7 +2244,6 @@ var ArgsObject = /*#__PURE__*/function (_InstanceType) {
      * @param {{}}     args
      *
      * @throws {Error}
-     *
      */
   }, {
     key: "requireArgumentConstructor",

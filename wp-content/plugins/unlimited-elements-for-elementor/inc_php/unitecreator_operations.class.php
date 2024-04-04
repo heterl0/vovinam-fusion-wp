@@ -703,66 +703,51 @@ class UCOperations extends UniteElementsBaseUC{
 	/**
 	 * get url contents from file or url with cache
 	 */
-	public function getUrlContents($url, $showDebug = false){
-
-		if($showDebug == true)
+	public function getUrlContents($url, $debug = false){
+	
+		if($debug === true)
 			dmp("get contents from url: $url");
 
 		$urlRelative = HelperUC::URLtoRelative($url);
 
 		$isFile = $urlRelative != $url;
 
-		if($isFile == true){
+		if($isFile === true){
 			$pathFile = HelperUC::urlToPath($url);
 
 			if(empty($pathFile)){
-				if($showDebug == true){
+				if($debug === true){
 					$pathFile = GlobalsUC::$path_base . $urlRelative;
 
 					dmp("file not exists:  $pathFile");
-					exit();
+					exit;
 				}
 
-				return (null);
+				return null;
 			}
 
-			if($showDebug == true)
+			if($debug === true)
 				dmp("file detected: $pathFile");
 
 			$content = file_get_contents($pathFile);
 
-			return ($content);
-		}
-
-		//add to cache
-
-		$cacheKey = "uc_geturl_" . $url;
-		$cacheKey = HelperInstaUC::convertTitleToHandle($cacheKey);
-
-		$content = UniteProviderFunctionsUC::getTransient($cacheKey);
-
-		if(!empty($content)){
-			if($showDebug == true)
-				dmp("get contents from cache (3 min)");
-
-			return ($content);
+			return $content;
 		}
 
 		try{
-			$content = UniteFunctionsUC::getUrlContents($url, null, false);
+			$request = UEHttp::make();
+			$request->debug($debug);
+			$request->cacheTime(180); // 3 minutes
 
-			if($showDebug == true)
-				dmp("get contents from url itself");
+			$response = $request->get($url);
+			$data = $response->body();
+
+			return $data;
 		}catch(Exception $e){
-			if($showDebug == true)
-				dmp("failed to get url contents: $url");
-
-			return (null);
+			//
 		}
 
-		UniteProviderFunctionsUC::setTransient($cacheKey, $content, 180);  //3 min
-
-		return ($content);
+		return null;
 	}
 
 	private function a____________DATE____________(){
@@ -1057,7 +1042,7 @@ class UCOperations extends UniteElementsBaseUC{
 	 * get last query data
 	 */
 	public function getLastQueryData(){
-		
+
 		$query = GlobalsProviderUC::$lastPostQuery;
 
 		if(empty($query)){
@@ -1075,23 +1060,23 @@ class UCOperations extends UniteElementsBaseUC{
 		$numPosts = 0;
 		if(isset($query->posts))
 			$numPosts = count($query->posts);
-		
+
 		$totalPosts = 0;
 		if(isset($query->found_posts))
 			$totalPosts = $query->found_posts;
 
 		$arrQuery = $query->query;
-				
+
 		$postType = UniteFunctionsUC::getVal($arrQuery, "post_type");
 
 		$orderBy = UniteFunctionsUC::getVal($arrQuery, "orderby");
 		$orderDir = UniteFunctionsUC::getVal($arrQuery, "order");
-		
+
 		if(is_array($orderBy)){
 			$orderDir = UniteFunctionsUC::getArrFirstValue($orderBy);
 			$orderBy = UniteFunctionsUC::getFirstNotEmptyKey($orderBy);
 		}
-		
+
 		$orderBy = strtolower($orderBy);
 		$orderDir = strtolower($orderDir);
 

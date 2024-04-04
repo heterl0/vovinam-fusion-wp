@@ -397,6 +397,9 @@ class UniteCreatorElementorWidget extends Widget_Base {
     			if(empty($value))
     				$value = GlobalsUC::$url_no_image_placeholder;
     			
+		    	if(GlobalsUnlimitedElements::$isImporting == true)
+    				$value = "";
+		    	
     			if(is_numeric($value))    				
     				$value = array("id"=>$value);
     			else
@@ -476,6 +479,8 @@ class UniteCreatorElementorWidget extends Widget_Base {
      */
     protected function modifyDefaultItemsDataUC($arrItemsData, $objAddon){
     	
+    	//don't put default data placeholders when widget imports
+    	    	
     	$arrItemsTypes = $objAddon->getParamsTypes(true);
     	
     	foreach($arrItemsData as $key=>$arrData){    		
@@ -2436,6 +2441,7 @@ class UniteCreatorElementorWidget extends Widget_Base {
      */
    protected function ucRegisterControls_addon(){
 		
+   		
    		//$name = $this->objAddon->getAlias();
    		   	
    		//check low memory
@@ -3085,7 +3091,6 @@ class UniteCreatorElementorWidget extends Widget_Base {
 		       	  		        
 	        	$arrItemsData = $objAddon->getArrItemsForConfig();
 	        	
-	        	//dmp($arrItemsData);exit();
 	        	
 	        	if(!empty($arrItemsData)){
 	        		
@@ -3283,8 +3288,9 @@ class UniteCreatorElementorWidget extends Widget_Base {
     */
     protected function register_controls() {
 
-    	//$this->registerControlsTest();
-    	//return(false);
+   		//skip controls when saving builder
+    	if(UniteCreatorElementorIntegrate::$isSaveBuilderMode == true)
+    		return(false);
     	
     	try{
           
@@ -3968,6 +3974,13 @@ class UniteCreatorElementorWidget extends Widget_Base {
      */    
     protected function render() {
 		
+    	if(UniteCreatorElementorIntegrate::$isSaveBuilderMode == true){
+    		
+    		echo "skip render: ".$this->get_name();
+    		return(false);
+    	}
+    	
+    	
     	if($this->isNoMemory == true){
     		echo "no memory to render ".$this->isNoMemory_addonName." widget. <br> Please increase memory_limit in php.ini";	
     		return(false);

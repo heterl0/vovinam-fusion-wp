@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInita715523d44e1f0154b77465f8ac1d977
+class ComposerStaticInitf5d792942004e9483018be005ffee7e9
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -335,6 +335,8 @@ class ComposerStaticInita715523d44e1f0154b77465f8ac1d977
         'Automattic\\Jetpack\\Files' => __DIR__ . '/..' . '/automattic/jetpack-status/src/class-files.php',
         'Automattic\\Jetpack\\Heartbeat' => __DIR__ . '/..' . '/automattic/jetpack-connection/src/class-heartbeat.php',
         'Automattic\\Jetpack\\Modules' => __DIR__ . '/..' . '/automattic/jetpack-status/src/class-modules.php',
+        'Automattic\\Jetpack\\Partner' => __DIR__ . '/..' . '/automattic/jetpack-connection/src/class-partner.php',
+        'Automattic\\Jetpack\\Partner_Coupon' => __DIR__ . '/..' . '/automattic/jetpack-connection/src/class-partner-coupon.php',
         'Automattic\\Jetpack\\Paths' => __DIR__ . '/..' . '/automattic/jetpack-status/src/class-paths.php',
         'Automattic\\Jetpack\\Redirect' => __DIR__ . '/..' . '/automattic/jetpack-redirect/src/class-redirect.php',
         'Automattic\\Jetpack\\Roles' => __DIR__ . '/..' . '/automattic/jetpack-roles/src/class-roles.php',
@@ -446,9 +448,7 @@ class ComposerStaticInita715523d44e1f0154b77465f8ac1d977
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\BulkEdit\\BulkEditInterface' => __DIR__ . '/../..' . '/src/Admin/BulkEdit/BulkEditInterface.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\BulkEdit\\CouponBulkEdit' => __DIR__ . '/../..' . '/src/Admin/BulkEdit/CouponBulkEdit.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Input\\BooleanSelect' => __DIR__ . '/../..' . '/src/Admin/Input/BooleanSelect.php',
-        'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Input\\Checkbox' => __DIR__ . '/../..' . '/src/Admin/Input/Checkbox.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Input\\DateTime' => __DIR__ . '/../..' . '/src/Admin/Input/DateTime.php',
-        'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Input\\Decimal' => __DIR__ . '/../..' . '/src/Admin/Input/Decimal.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Input\\Form' => __DIR__ . '/../..' . '/src/Admin/Input/Form.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Input\\FormException' => __DIR__ . '/../..' . '/src/Admin/Input/FormException.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Input\\FormInterface' => __DIR__ . '/../..' . '/src/Admin/Input/FormInterface.php',
@@ -464,8 +464,10 @@ class ComposerStaticInita715523d44e1f0154b77465f8ac1d977
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\MetaBox\\MetaBoxInitializer' => __DIR__ . '/../..' . '/src/Admin/MetaBox/MetaBoxInitializer.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\MetaBox\\MetaBoxInterface' => __DIR__ . '/../..' . '/src/Admin/MetaBox/MetaBoxInterface.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\MetaBox\\SubmittableMetaBox' => __DIR__ . '/../..' . '/src/Admin/MetaBox/SubmittableMetaBox.php',
+        'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\ProductBlocksService' => __DIR__ . '/../..' . '/src/Admin/ProductBlocksService.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\AttributesForm' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/AttributesForm.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\AttributesTab' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/AttributesTab.php',
+        'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\AttributesTrait' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/AttributesTrait.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\Input\\AdultInput' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/Input/AdultInput.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\Input\\AgeGroupInput' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/Input/AgeGroupInput.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\Input\\AttributeInputInterface' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/Input/AttributeInputInterface.php',
@@ -484,6 +486,7 @@ class ComposerStaticInita715523d44e1f0154b77465f8ac1d977
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\Input\\SizeSystemInput' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/Input/SizeSystemInput.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\Input\\SizeTypeInput' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/Input/SizeTypeInput.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\Attributes\\VariationsAttributes' => __DIR__ . '/../..' . '/src/Admin/Product/Attributes/VariationsAttributes.php',
+        'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Product\\ChannelVisibilityBlock' => __DIR__ . '/../..' . '/src/Admin/Product/ChannelVisibilityBlock.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Admin\\Redirect' => __DIR__ . '/../..' . '/src/Admin/Redirect.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Ads\\AccountService' => __DIR__ . '/../..' . '/src/Ads/AccountService.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Ads\\AdsAwareInterface' => __DIR__ . '/../..' . '/src/Ads/AdsAwareInterface.php',
@@ -767,6 +770,7 @@ class ComposerStaticInita715523d44e1f0154b77465f8ac1d977
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Tracking\\EventTracking' => __DIR__ . '/../..' . '/src/Tracking/EventTracking.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Tracking\\Events\\ActivatedEvents' => __DIR__ . '/../..' . '/src/Tracking/Events/ActivatedEvents.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Tracking\\Events\\BaseEvent' => __DIR__ . '/../..' . '/src/Tracking/Events/BaseEvent.php',
+        'Automattic\\WooCommerce\\GoogleListingsAndAds\\Tracking\\Events\\GenericEvents' => __DIR__ . '/../..' . '/src/Tracking/Events/GenericEvents.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Tracking\\Events\\SiteClaimEvents' => __DIR__ . '/../..' . '/src/Tracking/Events/SiteClaimEvents.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Tracking\\Events\\SiteVerificationEvents' => __DIR__ . '/../..' . '/src/Tracking/Events/SiteVerificationEvents.php',
         'Automattic\\WooCommerce\\GoogleListingsAndAds\\Tracking\\Events\\TracksEventInterface' => __DIR__ . '/../..' . '/src/Tracking/Events/TracksEventInterface.php',
@@ -4155,9 +4159,9 @@ class ComposerStaticInita715523d44e1f0154b77465f8ac1d977
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInita715523d44e1f0154b77465f8ac1d977::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInita715523d44e1f0154b77465f8ac1d977::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInita715523d44e1f0154b77465f8ac1d977::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitf5d792942004e9483018be005ffee7e9::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitf5d792942004e9483018be005ffee7e9::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitf5d792942004e9483018be005ffee7e9::$classMap;
 
         }, null, ClassLoader::class);
     }

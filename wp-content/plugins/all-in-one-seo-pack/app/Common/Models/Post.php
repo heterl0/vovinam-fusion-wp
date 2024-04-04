@@ -73,6 +73,17 @@ class Post extends Model {
 	];
 
 	/**
+	 * Fields that can be null when saved.
+	 *
+	 * @since 4.5.7
+	 *
+	 * @var array
+	 */
+	protected $nullFields = [
+		'priority'
+	];
+
+	/**
 	 * Returns a Post with a given ID.
 	 *
 	 * @since 4.0.0
@@ -729,7 +740,7 @@ class Post extends Model {
 	 * @since 4.3.2
 	 *
 	 * @param  array $existingOptions The existing options.
-	 * @return array                  The default options.
+	 * @return object                 The default options.
 	 */
 	public static function getDefaultOpenAiOptions( $existingOptions = [] ) {
 		$defaults = [

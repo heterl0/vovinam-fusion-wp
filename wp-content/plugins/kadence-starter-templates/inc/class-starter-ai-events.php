@@ -102,21 +102,6 @@ class Kadence_Starter_Templates_AI_Events {
 			if ( ! empty( $data['key'] ) ) {
 				return $data['key'];
 			}
-		} elseif ( class_exists( 'Kadence_Theme_Pro' ) ) {
-			$pro_data = array();
-			if ( function_exists( '\KadenceWP\KadencePro\StellarWP\Uplink\get_license_key' ) ) {
-				$pro_data['ktp_api_key'] = \KadenceWP\KadencePro\StellarWP\Uplink\get_license_key( 'kadence-theme-pro' );
-			}
-			if ( empty( $pro_data ) ) {
-				if ( is_multisite() && ! apply_filters( 'kadence_activation_individual_multisites', false ) ) {
-					$pro_data = get_site_option( 'ktp_api_manager' );
-				} else {
-					$pro_data = get_option( 'ktp_api_manager' );
-				}
-			}
-			if ( ! empty( $pro_data['ktp_api_key'] ) ) {
-				return $pro_data['ktp_api_key'];
-			}
 		} else {
 			$key = get_license_key( 'kadence-starter-templates' );
 			if ( ! empty( $key ) ) {
@@ -137,15 +122,13 @@ class Kadence_Starter_Templates_AI_Events {
 		$slug = class_exists( '\KadenceWP\KadenceBlocks\App' ) ? 'kadence-blocks' : 'kadence-starter-templates';
 		if ( class_exists( '\KadenceWP\KadenceBlocks\App' ) ) {
 			$token          = \KadenceWP\KadenceBlocks\StellarWP\Uplink\get_authorization_token( $slug );
-			$auth_url       = \KadenceWP\KadenceBlocks\StellarWP\Uplink\build_auth_url( apply_filters( 'kadence-blocks-auth-slug', $slug ), get_license_domain() );
 		} else {
 			$token          = get_authorization_token( $slug );
-			$auth_url       = build_auth_url( apply_filters( 'kadence-blocks-auth-slug', $slug ), get_license_domain() );
 		}
 		$license_key    = $this->get_current_license_key();
 		$is_authorized = false;
-		if ( $token && $license_key ) {
-			$is_authorized = is_authorized( $license_key, $token, get_license_domain() );
+		if ( ! empty( $token ) && ! empty( $license_key ) ) {
+			$is_authorized = is_authorized( $license_key, apply_filters( 'kadence-blocks-auth-slug', $slug ), $token, get_license_domain() );
 		}
 		if ( ! $is_authorized ) {
 			return;
@@ -189,7 +172,7 @@ class Kadence_Starter_Templates_AI_Events {
 		$defaults = [
 			'domain'          => $site_url,
 			'key'             => ! empty( $license_key ) ? $license_key : '',
-			'site_name'       => $site_name,
+			'site_name'       => sanitize_title( $site_name ),
 			'product_slug'    => 'kadence-starter-templates',
 			'product_version' => KADENCE_STARTER_TEMPLATES_VERSION,
 		];
@@ -249,6 +232,12 @@ class Kadence_Starter_Templates_AI_Events {
 					'starter_slug'       => $event_data['slug'] ?? '',
 					'starter_name'       => $event_data['name'] ?? '',
 					'starter_is_dark'    => $event_data['is_dark'] ?? false,
+					'is_pro'             => $event_data['is_pro'] ?? false,
+					'plugins'            => ( ! empty( $event_data['plugins'] ) && is_array( $event_data['plugins'] ) ? implode( ',', $event_data['plugins'] ) : '' ),
+					'pages'            => ( ! empty( $event_data['pages'] ) && is_array( $event_data['pages'] ) ? implode( ',', $event_data['pages'] ) : '' ),
+					'font_pair'          => $event_data['font_pair'] ?? '',
+					'custom_color'       => $event_data['custom_color'] ?? false,
+					'has_content'        => $event_data['has_content'] ?? false,
 					'starter_has_woo'    => $event_data['has_woo'] ?? false,
 					'starter_has_posts'  => $event_data['has_posts'] ?? false,
 				];

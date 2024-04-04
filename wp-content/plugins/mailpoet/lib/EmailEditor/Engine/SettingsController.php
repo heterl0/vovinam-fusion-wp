@@ -21,18 +21,6 @@ class SettingsController {
 
   const DEFAULT_SETTINGS = [
     'enableCustomUnits' => ['px', '%'],
-    '__experimentalFeatures' => [
-      'color' => [
-        'custom' => true,
-        'text' => true,
-        'background' => true,
-        'customGradient' => false,
-        'defaultPalette' => true,
-        'palette' => [
-          'default' => [],
-        ],
-      ],
-    ],
   ];
 
   /**
@@ -48,75 +36,26 @@ class SettingsController {
   const EMAIL_LAYOUT_BACKGROUND = '#cccccc';
 
   /**
-   * Padding of the email in pixels.
-   * @var string
-   */
-  const EMAIL_PADDING = '10px';
-
-  /**
    * Gap between blocks in flex layouts
    * @var string
    */
   const FLEX_GAP = '16px';
 
-  /**
-   * Default styles applied to the email. These are going to be replaced by style settings.
-   * This is currently more af a proof of concept that we can apply styles to the email.
-   * We will gradually replace these hardcoded values with styles saved as global styles or styles saved with the email.
-   * @var array
-   */
-  const DEFAULT_EMAIL_CONTENT_STYLES = [
-    'typography' => [
-      'fontFamily' => "Arial, 'Helvetica Neue', Helvetica, sans-serif",
-      'fontSize' => '16px',
-    ],
-    'h1' => [
-      'typography' => [
-        'fontSize' => '32px',
-      ],
-    ],
-    'h2' => [
-      'typography' => [
-        'fontSize' => '24px',
-      ],
-    ],
-    'h3' => [
-      'typography' => [
-        'fontSize' => '18px',
-      ],
-    ],
-    'h4' => [
-      'typography' => [
-        'fontSize' => '16px',
-      ],
-    ],
-    'h5' => [
-      'typography' => [
-        'fontSize' => '14px',
-      ],
-    ],
-    'h6' => [
-      'typography' => [
-        'fontSize' => '12px',
-      ],
-    ],
-  ];
+  private ThemeController $themeController;
 
-  private $availableStylesheets = '';
+  /**
+   * @param ThemeController $themeController
+   */
+  public function __construct(
+    ThemeController $themeController
+  ) {
+    $this->themeController = $themeController;
+  }
 
   public function getSettings(): array {
     $coreDefaultSettings = get_default_block_editor_settings();
-    $coreThemeData = \WP_Theme_JSON_Resolver::get_core_data();
-    $coreSettings = $coreThemeData->get_settings();
-
-    // Enable custom spacing
-    $coreSettings['spacing']['units'] = ['px'];
-    $coreSettings['spacing']['padding'] = true;
-    // Typography
-    $coreSettings['typography']['dropCap'] = false; // Showing large initial letter cannot be implemented in emails
-    $coreSettings['typography']['fontWeight'] = false; // Font weight will be handled by the font family later
-
-    $theme = $this->getTheme();
+    $editorTheme = $this->getTheme();
+    $themeSettings = $this->themeController->getSettings();
 
     // body selector is later transformed to .editor-styles-wrapper
     // setting padding for bottom and top is needed because \WP_Theme_JSON::get_stylesheet() set them only for .wp-site-blocks selector
@@ -131,21 +70,15 @@ class SettingsController {
     $flexEmailLayoutStyles = file_get_contents(__DIR__ . '/flex-email-layout.css');
 
     $settings['styles'] = [
-      $coreDefaultSettings['defaultEditorStyles'][0],
       ['css' => wp_get_global_stylesheet(['base-layout-styles'])],
-      ['css' => $theme->get_stylesheet()],
+      ['css' => $editorTheme->get_stylesheet()],
       ['css' => $contentVariables],
       ['css' => $flexEmailLayoutStyles],
     ];
 
-    $settings['__experimentalFeatures'] = $coreSettings;
-    // Enable border radius, color, style and width where possible
-    $settings['__experimentalFeatures']['border'] = [
-      "radius" => true,
-      "color" => true,
-      "style" => true,
-      "width" => true,
-    ];
+    $settings['styles'] = apply_filters('mailpoet_email_editor_editor_styles', $settings['styles']);
+
+    $settings['__experimentalFeatures'] = $themeSettings;
 
     // Enabling alignWide allows full width for specific blocks such as columns, heading, image, etc.
     $settings['alignWide'] = true;
@@ -163,38 +96,46 @@ class SettingsController {
     ];
   }
 
-  public function getEmailContentStyles(): array {
-    return self::DEFAULT_EMAIL_CONTENT_STYLES;
-  }
-
-  public function getAvailableStylesheets(): string {
-    if ($this->availableStylesheets) return $this->availableStylesheets;
-    $coreThemeData = \WP_Theme_JSON_Resolver::get_core_data();
-    $this->availableStylesheets = $coreThemeData->get_stylesheet();
-    return $this->availableStylesheets;
-  }
-
   /**
-   * @return array{width: string, background: string, padding: array{bottom: string, left: string, right: string, top: string}}
+   * @return array{
+   *   layout: array{width: string,background: string,padding: array{bottom: string, left: string, right: string, top: string}},
+   *   colors: array{background: string},
+   *   typography: array[]
+   * }
    */
-  public function getEmailLayoutStyles(): array {
+  public function getEmailStyles(): array {
     return [
-      'width' => self::EMAIL_WIDTH,
-      'background' => self::EMAIL_LAYOUT_BACKGROUND,
-      'padding' => [
-        'bottom' => self::EMAIL_PADDING,
-        'left' => self::EMAIL_PADDING,
-        'right' => self::EMAIL_PADDING,
-        'top' => self::EMAIL_PADDING,
+      'layout' => [
+        'background' => self::EMAIL_LAYOUT_BACKGROUND,
+        'width' => self::EMAIL_WIDTH,
+        'padding' => [
+          'bottom' => self::FLEX_GAP,
+          'left' => self::FLEX_GAP,
+          'right' => self::FLEX_GAP,
+          'top' => self::FLEX_GAP,
+        ],
+      ],
+      'colors' => [
+        'background' => '#ffffff',
+      ],
+      'typography' => [
+      ],
+      // Value are only for purpose of displaying in the preview component in style sidebar
+      'elements' => [
+        'h1' => [
+          'color' => '#000000',
+          'fontWeight' => 'bold',
+          'fontFamily' => "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+        ],
       ],
     ];
   }
 
   public function getLayoutWidthWithoutPadding(): string {
-    $layoutStyles = $this->getEmailLayoutStyles();
-    $width = $this->parseNumberFromStringWithPixels($layoutStyles['width']);
-    $width -= $this->parseNumberFromStringWithPixels($layoutStyles['padding']['left']);
-    $width -= $this->parseNumberFromStringWithPixels($layoutStyles['padding']['right']);
+    $layoutStyles = $this->getEmailStyles();
+    $width = $this->parseNumberFromStringWithPixels($layoutStyles['layout']['width']);
+    $width -= $this->parseNumberFromStringWithPixels($layoutStyles['layout']['padding']['left']);
+    $width -= $this->parseNumberFromStringWithPixels($layoutStyles['layout']['padding']['right']);
     return "{$width}px";
   }
 
@@ -226,9 +167,14 @@ class SettingsController {
   }
 
   public function getTheme(): \WP_Theme_JSON {
-    $themeJson = (string)file_get_contents(dirname(__FILE__) . '/theme.json');
-    $themeJson = json_decode($themeJson, true);
-    /** @var array $themeJson */
-    return new \WP_Theme_JSON($themeJson);
+    return $this->themeController->getTheme();
+  }
+
+  public function translateSlugToFontSize(string $fontSize): string {
+    return $this->themeController->translateSlugToFontSize($fontSize);
+  }
+
+  public function translateSlugToColor(string $colorSlug): string {
+    return $this->themeController->translateSlugToColor($colorSlug);
   }
 }

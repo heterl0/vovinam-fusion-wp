@@ -1,4 +1,4 @@
-/*! elementor - v3.18.0 - 20-12-2023 */
+/*! elementor - v3.20.0 - 11-03-2024 */
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -2552,7 +2552,7 @@ Object.defineProperty(exports, "__esModule", ({
 exports["default"] = void 0;
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "../node_modules/@babel/runtime/helpers/classCallCheck.js"));
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "../node_modules/@babel/runtime/helpers/createClass.js"));
-var _element = _interopRequireDefault(__webpack_require__(/*! ../../elements/models/element */ "../assets/dev/js/editor/elements/models/element.js"));
+var _element = _interopRequireDefault(__webpack_require__(/*! elementor-elements/models/element */ "../assets/dev/js/editor/elements/models/element.js"));
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
@@ -2822,6 +2822,7 @@ var FileReaderBase = /*#__PURE__*/function () {
     (0, _defineProperty2.default)(this, "file", void 0);
     this.file = file;
   }
+
   /**
    * Get the file-reader name.
    *
@@ -2906,6 +2907,18 @@ var FileReaderBase = /*#__PURE__*/function () {
     key: "getName",
     value: function getName() {
       return '';
+    }
+
+    /**
+     * Check if the reader is currently active.
+     *
+     * @abstract
+     * @return {boolean}
+     */
+  }, {
+    key: "isActive",
+    value: function isActive() {
+      return true;
     }
 
     /**
@@ -3288,6 +3301,7 @@ var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*!
 var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "../node_modules/@babel/runtime/helpers/getPrototypeOf.js"));
 var _fileParserBase = _interopRequireDefault(__webpack_require__(/*! ../../file-parser-base */ "../assets/dev/js/editor/components/browser-import/files/file-parser-base.js"));
 var _containerFactory = _interopRequireDefault(__webpack_require__(/*! ../../../container-factory */ "../assets/dev/js/editor/components/browser-import/container-factory.js"));
+var _filesUploadHandler = _interopRequireDefault(__webpack_require__(/*! ../../../../../utils/files-upload-handler */ "../assets/dev/js/editor/utils/files-upload-handler.js"));
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 var Elements = /*#__PURE__*/function (_FileParserBase) {
@@ -3349,26 +3363,73 @@ var Elements = /*#__PURE__*/function (_FileParserBase) {
   }, {
     key: "validate",
     value: function () {
-      var _validate = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(reader) {
-        var data;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
-          while (1) switch (_context2.prev = _context2.next) {
+      var _validate = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(reader) {
+        var _this = this;
+        return _regenerator.default.wrap(function _callee3$(_context3) {
+          while (1) switch (_context3.prev = _context3.next) {
             case 0:
-              _context2.next = 2;
-              return reader.getData();
+              if (elementorCommon.config.filesUpload.unfilteredFiles) {
+                _context3.next = 2;
+                break;
+              }
+              return _context3.abrupt("return", new Promise(function (resolve) {
+                var enableUnfilteredDialog = _filesUploadHandler.default.getUnfilteredFilesNotEnabledImportTemplateDialog( /*#__PURE__*/(0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2() {
+                  var result;
+                  return _regenerator.default.wrap(function _callee2$(_context2) {
+                    while (1) switch (_context2.prev = _context2.next) {
+                      case 0:
+                        _context2.next = 2;
+                        return _this.validateData(reader);
+                      case 2:
+                        result = _context2.sent;
+                        resolve(result);
+                      case 4:
+                      case "end":
+                        return _context2.stop();
+                    }
+                  }, _callee2);
+                })));
+                enableUnfilteredDialog.show();
+              }));
             case 2:
-              data = _context2.sent;
-              return _context2.abrupt("return", data.version && data.type && Array.isArray(data.content));
+              _context3.next = 4;
+              return this.validateData(reader);
             case 4:
+              return _context3.abrupt("return", _context3.sent);
+            case 5:
             case "end":
-              return _context2.stop();
+              return _context3.stop();
           }
-        }, _callee2);
+        }, _callee3, this);
       }));
       function validate(_x) {
         return _validate.apply(this, arguments);
       }
       return validate;
+    }()
+  }, {
+    key: "validateData",
+    value: function () {
+      var _validateData = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(reader) {
+        var data;
+        return _regenerator.default.wrap(function _callee4$(_context4) {
+          while (1) switch (_context4.prev = _context4.next) {
+            case 0:
+              _context4.next = 2;
+              return reader.getData();
+            case 2:
+              data = _context4.sent;
+              return _context4.abrupt("return", data.version && data.type && Array.isArray(data.content));
+            case 4:
+            case "end":
+              return _context4.stop();
+          }
+        }, _callee4);
+      }));
+      function validateData(_x2) {
+        return _validateData.apply(this, arguments);
+      }
+      return validateData;
     }()
   }]);
   return Elements;
@@ -3733,6 +3794,12 @@ var Json = /*#__PURE__*/function (_FileReaderBase) {
      */
     function getName() {
       return 'json';
+    }
+  }, {
+    key: "isActive",
+    value: function isActive() {
+      var _elementor$config$use, _elementor$config$use2;
+      return elementor.config.user.is_administrator || ((_elementor$config$use = (_elementor$config$use2 = elementor.config.user.restrictions) === null || _elementor$config$use2 === void 0 ? void 0 : _elementor$config$use2.includes('json-upload')) !== null && _elementor$config$use !== void 0 ? _elementor$config$use : false);
     }
 
     /**
@@ -4156,8 +4223,12 @@ var Manager = /*#__PURE__*/function (_elementorModules$edi) {
         _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var _reader$isActive, _reader$isActive2;
           var reader = _step.value;
-          this.registerFileReader(reader);
+          var isActive = (_reader$isActive = (_reader$isActive2 = reader.isActive) === null || _reader$isActive2 === void 0 ? void 0 : _reader$isActive2.call(reader)) !== null && _reader$isActive !== void 0 ? _reader$isActive : true;
+          if (isActive) {
+            this.registerFileReader(reader);
+          }
         }
       } catch (err) {
         _iterator.e(err);
@@ -4242,7 +4313,7 @@ var Manager = /*#__PURE__*/function (_elementorModules$edi) {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
           var readerName = _step3.value;
           if (!this.readers[readerName]) {
-            throw new Error("Reader ".concat(readerName, " is not registered."));
+            continue;
           } else if (!this.parsers[readerName]) {
             this.parsers[readerName] = {};
           }
@@ -9904,6 +9975,17 @@ var Component = /*#__PURE__*/function (_ComponentModalBase) {
   }, {
     key: "insertTemplate",
     value: function insertTemplate(args) {
+      this.downloadTemplate(args, function (data, callbackParams) {
+        $e.run('document/elements/import', {
+          model: callbackParams.model,
+          data: data,
+          options: callbackParams.importOptions
+        });
+      });
+    }
+  }, {
+    key: "downloadTemplate",
+    value: function downloadTemplate(args, callback) {
       var _this2 = this;
       var autoImportSettings = elementor.config.document.remoteLibrary.autoImportSettings,
         model = args.model;
@@ -9930,10 +10012,9 @@ var Component = /*#__PURE__*/function (_ComponentModalBase) {
           // Hide for next open.
           _this2.manager.layout.hideLoadingView();
           _this2.manager.layout.hideModal();
-          $e.run('document/elements/import', {
+          callback(data, {
             model: model,
-            data: data,
-            options: importOptions
+            importOptions: importOptions
           });
         },
         error: function error(data) {
@@ -11122,10 +11203,13 @@ TemplateLibraryTemplateView = Marionette.ItemView.extend({
       'click @ui.previewButton': 'onPreviewButtonClick'
     };
   },
-  behaviors: {
-    insertTemplate: {
-      behaviorClass: TemplateLibraryInsertTemplateBehavior
-    }
+  behaviors: function behaviors() {
+    var behaviors = {
+      insertTemplate: {
+        behaviorClass: TemplateLibraryInsertTemplateBehavior
+      }
+    };
+    return elementor.hooks.applyFilters('elementor/editor/template-library/template/behaviors', behaviors, this);
   }
 });
 module.exports = TemplateLibraryTemplateView;
@@ -11536,7 +11620,6 @@ var ChildrenArray = /*#__PURE__*/function (_Array) {
      * Will run over children recursively, breaks if the callback return true.
      *
      * @param {function(Container) : *} callback
-     *
      */
   }, {
     key: "someRecursive",
@@ -12857,9 +12940,11 @@ ControlCodeEditorItemView = ControlBaseDataView.extend({
     }
     self.editor.setValue(self.getControlValue(), -1); // -1 =  move cursor to the start
 
-    self.editor.on('change', function () {
-      self.setValue(self.editor.getValue());
-    });
+    if (this.isEditable()) {
+      self.editor.on('change', function () {
+        self.setValue(self.editor.getValue());
+      });
+    }
     if ('html' === self.model.attributes.language) {
       // Remove the `doctype` annotation
       var session = self.editor.getSession();
@@ -12883,6 +12968,10 @@ ControlCodeEditorItemView = ControlBaseDataView.extend({
   },
   onDestroy: function onDestroy() {
     elementor.panel.$el.off('resize.aceEditor');
+  },
+  isEditable: function isEditable() {
+    var isEditable = this.model.get('is_editable');
+    return undefined !== isEditable ? isEditable : true;
   }
 });
 module.exports = ControlCodeEditorItemView;
@@ -13631,6 +13720,8 @@ module.exports = ControlSelect2View.extend({
 
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ "../node_modules/@babel/runtime/regenerator/index.js"));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "../node_modules/@babel/runtime/helpers/asyncToGenerator.js"));
 var _filesUploadHandler = _interopRequireDefault(__webpack_require__(/*! ../utils/files-upload-handler */ "../assets/dev/js/editor/utils/files-upload-handler.js"));
 var ControlBaseDataView = __webpack_require__(/*! elementor-controls/base-data */ "../assets/dev/js/editor/controls/base-data.js"),
   ControlMediaItemView;
@@ -13641,6 +13732,11 @@ ControlMediaItemView = ControlBaseDataView.extend({
     ui.clearGallery = '.elementor-control-gallery-clear';
     ui.galleryThumbnails = '.elementor-control-gallery-thumbnails';
     ui.status = '.elementor-control-gallery-status-title';
+    // eslint-disable-next-line capitalized-comments
+    // ui.warnings = '.elementor-control-media__warnings';
+    ui.promotions = '.elementor-control-media__promotions';
+    ui.promotions_dismiss = '.elementor-control-media__promotions .elementor-control-notice-dismiss';
+    ui.promotions_action = '.elementor-control-media__promotions .elementor-control-notice-main-actions button';
     return ui;
   },
   events: function events() {
@@ -13648,6 +13744,8 @@ ControlMediaItemView = ControlBaseDataView.extend({
       'click @ui.addImages': 'onAddImagesClick',
       'click @ui.clearGallery': 'onClearGalleryClick',
       'click @ui.galleryThumbnails': 'onGalleryThumbnailsClick',
+      'click @ui.promotions_dismiss': 'onPromotionDismiss',
+      'click @ui.promotions_action': 'onPromotionAction',
       'keyup @ui.galleryThumbnails': 'onGalleryThumbnailsKeyPress'
     });
   },
@@ -13655,28 +13753,87 @@ ControlMediaItemView = ControlBaseDataView.extend({
     this.initRemoveDialog();
   },
   applySavedValue: function applySavedValue() {
-    var images = this.getControlValue(),
-      imagesCount = images.length,
-      hasImages = !!imagesCount;
-    this.$el.toggleClass('elementor-gallery-has-images', hasImages).toggleClass('elementor-gallery-empty', !hasImages);
-    var $galleryThumbnails = this.ui.galleryThumbnails;
-    $galleryThumbnails.empty();
+    var _this = this;
+    return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+      var images, imagesCount, hasImages, imagesWithoutOptimization, promotionsAlwaysOn, hasPromotions, $galleryThumbnails, attachments;
+      return _regenerator.default.wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            images = _this.getControlValue(), imagesCount = images.length, hasImages = !!imagesCount, imagesWithoutOptimization = 0, promotionsAlwaysOn = false;
+            hasPromotions = _this.ui.promotions.length && !elementor.config.user.dismissed_editor_notices.includes(_this.getDismissPromotionEventName());
+            _this.$el.toggleClass('elementor-gallery-has-images', hasImages).toggleClass('elementor-gallery-empty', !hasImages);
+            $galleryThumbnails = _this.ui.galleryThumbnails;
+            $galleryThumbnails.empty();
 
-    /* Translators: %s: Selected images count. */
-    this.ui.status.text(hasImages ? sprintf(__('%s Images Selected', 'elementor'), imagesCount) : __('No Images Selected', 'elementor'));
-    if (!hasImages) {
-      return;
-    }
-    this.getControlValue().forEach(function (image) {
-      var $thumbnail = jQuery('<div>', {
-        class: 'elementor-control-gallery-thumbnail'
-      });
-      $thumbnail.css('background-image', 'url(' + image.url + ')');
-      $galleryThumbnails.append($thumbnail);
-    });
+            /* Translators: %s: Selected images count. */
+            _this.ui.status.text(hasImages ? sprintf(__('%s Images Selected', 'elementor'), imagesCount) : __('No Images Selected', 'elementor'));
+            if (hasPromotions) {
+              promotionsAlwaysOn = _this.ui.promotions.find('.elementor-control-notice').data('display') || false;
+            }
+            if (hasImages) {
+              _context.next = 9;
+              break;
+            }
+            return _context.abrupt("return");
+          case 9:
+            attachments = [];
+            _this.getControlValue().forEach(function (image, thumbIndex) {
+              var $thumbnail = jQuery('<img>', {
+                class: 'elementor-control-gallery-thumbnail',
+                src: image.url,
+                alt: 'gallery-thumbnail-' + thumbIndex
+              });
+              $galleryThumbnails.append($thumbnail);
+              var handleHints = function handleHints(attachment) {
+                var hasAlt = _this.imageHasAlt(attachment);
+                if (!hasAlt) {
+                  $thumbnail.addClass('unoptimized__image');
+                  // eslint-disable-next-line capitalized-comments
+                  // imagesWithoutAlt += hasAlt ? 0 : 1;
+                }
+
+                if (hasPromotions && _this.imageNotOptimized(attachment)) {
+                  imagesWithoutOptimization += 1;
+                }
+              };
+              attachments.push(wp.media.attachment(image.id).fetch().then(handleHints));
+            });
+
+            // Ensure all attachments are fetched before updating the warnings
+            _context.next = 13;
+            return Promise.all(attachments).then(function () {
+              // eslint-disable-next-line capitalized-comments
+              // this.ui.warnings.toggle( !! imagesWithoutAlt );
+              if (hasPromotions) {
+                var showHints = promotionsAlwaysOn || !!imagesWithoutOptimization;
+                _this.ui.promotions.toggle(showHints);
+              }
+            });
+          case 13:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee);
+    }))();
   },
   hasImages: function hasImages() {
     return !!this.getControlValue().length;
+  },
+  imageHasAlt: function imageHasAlt(attachment) {
+    var _attachment$alt;
+    var attachmentAlt = (attachment === null || attachment === void 0 ? void 0 : (_attachment$alt = attachment.alt) === null || _attachment$alt === void 0 ? void 0 : _attachment$alt.trim()) || '';
+    return !!attachmentAlt;
+  },
+  imageNotOptimized: function imageNotOptimized(attachment) {
+    var checks = {
+      height: 1080,
+      width: 1920,
+      filesizeInBytes: 200000
+    };
+    return Object.keys(checks).some(function (key) {
+      var value = attachment[key] || false;
+      return value && value > checks[key];
+    });
   },
   openFrame: function openFrame(action) {
     this.initFrame(action);
@@ -13769,6 +13926,50 @@ ControlMediaItemView = ControlBaseDataView.extend({
     this.setValue(images);
     this.applySavedValue();
   },
+  onPromotionDismiss: function onPromotionDismiss() {
+    this.dismissPromotion(this.getDismissPromotionEventName());
+  },
+  getDismissPromotionEventName: function getDismissPromotionEventName() {
+    var _$dismissButton$, _$dismissButton$$data;
+    var $promotions = this.ui.promotions;
+    var $dismissButton = $promotions.find('.elementor-control-notice-dismiss');
+    // Remove listener
+    $dismissButton.off('click');
+    return ((_$dismissButton$ = $dismissButton[0]) === null || _$dismissButton$ === void 0 ? void 0 : (_$dismissButton$$data = _$dismissButton$.dataset) === null || _$dismissButton$$data === void 0 ? void 0 : _$dismissButton$$data.event) || false;
+  },
+  hidePromotion: function hidePromotion() {
+    var eventName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var $promotions = this.ui.promotions;
+    $promotions.hide();
+    if (!eventName) {
+      eventName = this.getDismissPromotionEventName();
+    }
+    // Prevent opening the same promotion again in current editor session.
+    elementor.config.user.dismissed_editor_notices.push(eventName);
+  },
+  onPromotionAction: function onPromotionAction(event) {
+    var _JSON$parse = JSON.parse(event.target.closest('button').dataset.settings),
+      _JSON$parse$action_ur = _JSON$parse.action_url,
+      actionURL = _JSON$parse$action_ur === void 0 ? null : _JSON$parse$action_ur;
+    if (actionURL) {
+      window.open(actionURL, '_blank');
+    }
+    this.hidePromotion();
+  },
+  dismissPromotion: function dismissPromotion(eventName) {
+    var $promotions = this.ui.promotions;
+    $promotions.hide();
+    if (eventName) {
+      elementorCommon.ajax.addRequest('dismissed_editor_notices', {
+        data: {
+          dismissId: eventName
+        }
+      });
+
+      // Prevent opening the same promotion again in current editor session.
+      elementor.config.user.dismissed_editor_notices.push(eventName);
+    }
+  },
   onBeforeDestroy: function onBeforeDestroy() {
     if (this.frame) {
       this.frame.off();
@@ -13778,6 +13979,13 @@ ControlMediaItemView = ControlBaseDataView.extend({
   clearGallery: function clearGallery() {
     this.setValue([]);
     this.applySavedValue();
+
+    // eslint-disable-next-line capitalized-comments
+    // this.ui.warnings.hide();
+
+    if (this.ui.promotions) {
+      this.ui.promotions.hide();
+    }
   },
   initRemoveDialog: function initRemoveDialog() {
     var removeDialog;
@@ -13860,7 +14068,7 @@ ControlGapItemView = ControlDimensionsView.extend({
     }
     this.setSettingsModel(values);
   },
-  getControlValue: function getControlValue(key) {
+  getControlValue: function getControlValue() {
     var valuesUpdated = ControlDimensionsView.prototype.getControlValue.apply(this, arguments);
     if (this.shouldUpdateGapsValues(valuesUpdated)) {
       valuesUpdated.column = '' + valuesUpdated.size;
@@ -14418,6 +14626,11 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
     ui.mediaVideo = '.elementor-control-media-video';
     ui.frameOpeners = '.elementor-control-preview-area';
     ui.removeButton = '.elementor-control-media__remove';
+    // eslint-disable-next-line capitalized-comments
+    // ui.warnings = '.elementor-control-media__warnings';
+    ui.promotions = '.elementor-control-media__promotions';
+    ui.promotions_dismiss = '.elementor-control-media__promotions .elementor-control-notice-dismiss';
+    ui.promotions_action = '.elementor-control-media__promotions .elementor-control-notice-main-actions button';
     ui.fileName = '.elementor-control-media__file__content__info__name';
     ui.mediaInputImageSize = '.e-image-size-select';
     return ui;
@@ -14426,7 +14639,9 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
     return _.extend(ControlMultipleBaseItemView.prototype.events.apply(this, arguments), {
       'click @ui.frameOpeners': 'openFrame',
       'click @ui.removeButton': 'deleteImage',
-      'change @ui.mediaInputImageSize': 'onMediaInputImageSizeChange'
+      'change @ui.mediaInputImageSize': 'onMediaInputImageSizeChange',
+      'click @ui.promotions_dismiss': 'onPromotionDismiss',
+      'click @ui.promotions_action': 'onPromotionAction'
     });
   },
   getMediaType: function getMediaType() {
@@ -14446,9 +14661,11 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
     return 'svg' === mediaType ? 'image/svg+xml' : mediaType;
   },
   applySavedValue: function applySavedValue() {
-    var _this$getControlPlace;
+    var _this$getControlPlace,
+      _this = this;
     var value = this.getControlValue('url'),
       url = value || ((_this$getControlPlace = this.getControlPlaceholder()) === null || _this$getControlPlace === void 0 ? void 0 : _this$getControlPlace.url),
+      attachmentId = this.getControlValue('id'),
       isPlaceholder = !value && url,
       mediaType = this.getMediaType();
     if (['image', 'svg'].includes(mediaType)) {
@@ -14471,10 +14688,33 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
       this.ui.mediaInputImageSize.val(imageSize).toggleClass('e-select-placeholder', isPlaceholder);
     }
     this.ui.controlMedia.toggleClass('e-media-empty', !value).toggleClass('e-media-empty-placeholder', !value && !isPlaceholder);
+    if ('image' === mediaType) {
+      if (attachmentId) {
+        var dismissPromotionEventName = this.getDismissPromotionEventName();
+        var handleHints = function handleHints(attachment) {
+          // eslint-disable-next-line capitalized-comments
+          // this.ui.warnings.toggle( ! this.imageHasAlt( attachment ) );
+          if (_this.ui.promotions.length && !elementor.config.user.dismissed_editor_notices.includes(dismissPromotionEventName)) {
+            var alwaysOn = _this.ui.promotions.find('.elementor-control-notice').data('display') || false;
+            var showHint = alwaysOn || _this.imageNotOptimized(attachment);
+            _this.ui.promotions.toggle(showHint);
+          }
+        };
+        wp.media.attachment(attachmentId).fetch().then(handleHints);
+      } else {
+        // eslint-disable-next-line capitalized-comments
+        // this.ui.warnings.hide();
+
+        // eslint-disable-next-line no-lonely-if
+        if (this.ui.promotions.length) {
+          this.ui.promotions.hide();
+        }
+      }
+    }
   },
   openFrame: function openFrame(e) {
     var _arguments = arguments,
-      _this = this;
+      _this2 = this;
     return (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
       var _e$target, _e$target$dataset;
       var source, mediaType, selectedId;
@@ -14482,8 +14722,8 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
         while (1) switch (_context.prev = _context.next) {
           case 0:
             source = _arguments.length > 1 && _arguments[1] !== undefined ? _arguments[1] : null;
-            mediaType = (e === null || e === void 0 ? void 0 : (_e$target = e.target) === null || _e$target === void 0 ? void 0 : (_e$target$dataset = _e$target.dataset) === null || _e$target$dataset === void 0 ? void 0 : _e$target$dataset.mediaType) || _this.getMediaType();
-            _this.mediaType = mediaType;
+            mediaType = (e === null || e === void 0 ? void 0 : (_e$target = e.target) === null || _e$target === void 0 ? void 0 : (_e$target$dataset = _e$target.dataset) === null || _e$target$dataset === void 0 ? void 0 : _e$target$dataset.mediaType) || _this2.getMediaType();
+            _this2.mediaType = mediaType;
             if (mediaType) {
               _context.next = 5;
               break;
@@ -14495,7 +14735,7 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
               break;
             }
             _filesUploadHandler.default.getUnfilteredFilesNotEnabledDialog(function () {
-              return _this.openFrame(e, 'filter-popup');
+              return _this2.openFrame(e, 'filter-popup');
             }).show();
             return _context.abrupt("return", false);
           case 8:
@@ -14511,21 +14751,21 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
           case 11:
             // If there is no frame, or the current initialized frame contains a different library than
             // the `data-media-type` of the clicked button, (re)initialize the frame.
-            if (!_this.frame || _this.getLibraryType(mediaType) !== _this.currentLibraryType) {
-              _this.initFrame();
+            if (!_this2.frame || _this2.getLibraryType(mediaType) !== _this2.currentLibraryType) {
+              _this2.initFrame();
             }
-            _this.frame.open();
+            _this2.frame.open();
 
             // Set params to trigger sanitizer
-            _filesUploadHandler.default.setUploadTypeCaller(_this.frame);
-            selectedId = _this.getControlValue('id');
+            _filesUploadHandler.default.setUploadTypeCaller(_this2.frame);
+            selectedId = _this2.getControlValue('id');
             if (selectedId) {
               _context.next = 17;
               break;
             }
             return _context.abrupt("return");
           case 17:
-            _this.frame.state().get('selection').add(wp.media.attachment(selectedId));
+            _this2.frame.state().get('selection').add(wp.media.attachment(selectedId));
           case 18:
           case "end":
             return _context.stop();
@@ -14541,8 +14781,64 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
     });
     this.applySavedValue();
   },
+  imageHasAlt: function imageHasAlt(attachment) {
+    var _attachment$alt;
+    var attachmentAlt = (attachment === null || attachment === void 0 ? void 0 : (_attachment$alt = attachment.alt) === null || _attachment$alt === void 0 ? void 0 : _attachment$alt.trim()) || '';
+    return !!attachmentAlt;
+  },
+  imageNotOptimized: function imageNotOptimized(attachment) {
+    var checks = {
+      height: 1080,
+      width: 1920,
+      filesizeInBytes: 200000
+    };
+    return Object.keys(checks).some(function (key) {
+      var value = attachment[key] || false;
+      return value && value > checks[key];
+    });
+  },
+  getDismissPromotionEventName: function getDismissPromotionEventName() {
+    var _$dismissButton$, _$dismissButton$$data;
+    var $promotions = this.ui.promotions;
+    var $dismissButton = $promotions.find('.elementor-control-notice-dismiss');
+    // Remove listener
+    $dismissButton.off('click');
+    return ((_$dismissButton$ = $dismissButton[0]) === null || _$dismissButton$ === void 0 ? void 0 : (_$dismissButton$$data = _$dismissButton$.dataset) === null || _$dismissButton$$data === void 0 ? void 0 : _$dismissButton$$data.event) || false;
+  },
+  onPromotionDismiss: function onPromotionDismiss() {
+    this.dismissPromotion(this.getDismissPromotionEventName());
+  },
+  onPromotionAction: function onPromotionAction(event) {
+    var _JSON$parse = JSON.parse(event.target.closest('button').dataset.settings),
+      _JSON$parse$action_ur = _JSON$parse.action_url,
+      actionURL = _JSON$parse$action_ur === void 0 ? null : _JSON$parse$action_ur;
+    if (actionURL) {
+      window.open(actionURL, '_blank');
+    }
+    this.hidePromotion();
+  },
+  dismissPromotion: function dismissPromotion(eventName) {
+    this.hidePromotion(eventName);
+    if (eventName) {
+      elementorCommon.ajax.addRequest('dismissed_editor_notices', {
+        data: {
+          dismissId: eventName
+        }
+      });
+    }
+  },
+  hidePromotion: function hidePromotion() {
+    var eventName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var $promotions = this.ui.promotions;
+    $promotions.hide();
+    if (!eventName) {
+      eventName = this.getDismissPromotionEventName();
+    }
+    // Prevent opening the same promotion again in current editor session.
+    elementor.config.user.dismissed_editor_notices.push(eventName);
+  },
   onMediaInputImageSizeChange: function onMediaInputImageSizeChange() {
-    var _this2 = this;
+    var _this3 = this;
     if (!this.model.get('has_sizes')) {
       return;
     }
@@ -14574,7 +14870,7 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
       imageURL = (_data$currentControlV = data[currentControlValue.id]) === null || _data$currentControlV === void 0 ? void 0 : _data$currentControlV[currentControlValue.size];
       if (imageURL) {
         currentControlValue.url = imageURL;
-        _this2.setValue(currentControlValue);
+        _this3.setValue(currentControlValue);
       }
     });
     imageURL = elementor.imagesManager.getImageUrl({
@@ -14704,6 +15000,70 @@ ControlMediaItemView = ControlMultipleBaseItemView.extend({
   }
 });
 module.exports = ControlMediaItemView;
+
+/***/ }),
+
+/***/ "../assets/dev/js/editor/controls/notice.js":
+/*!**************************************************!*\
+  !*** ../assets/dev/js/editor/controls/notice.js ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "../node_modules/@babel/runtime/helpers/toConsumableArray.js"));
+var ControlBaseView = __webpack_require__(/*! elementor-controls/base */ "../assets/dev/js/editor/controls/base.js");
+module.exports = ControlBaseView.extend({
+  ui: function ui() {
+    var ui = ControlBaseView.prototype.ui.apply(this, arguments);
+    ui.button = '.elementor-control-notice-dismiss';
+    return ui;
+  },
+  events: {
+    'click @ui.button.e-btn-1': 'onButton1Click',
+    'click @ui.button.e-btn-2': 'onButton2Click',
+    'click @ui.button.elementor-control-notice-dismiss': 'onDismissButtonClick'
+  },
+  onButton1Click: function onButton1Click() {
+    var eventName = this.model.get('event');
+    elementor.channels.editor.trigger(eventName, this);
+  },
+  onButton2Click: function onButton2Click() {
+    var eventName = this.model.get('event');
+    elementor.channels.editor.trigger(eventName, this);
+  },
+  getDismissId: function getDismissId() {
+    var _this$options, _this$options$element, _this$options$element2, _this$options$element3, _this$options2, _this$options2$elemen, _this$options2$elemen2, _this$options2$elemen3, _this$options3, _this$options3$elemen, _this$options3$elemen2, _this$options3$elemen3;
+    var controlName = this.model.get('name');
+    var elementType = 'widget' === ((_this$options = this.options) === null || _this$options === void 0 ? void 0 : (_this$options$element = _this$options.element) === null || _this$options$element === void 0 ? void 0 : (_this$options$element2 = _this$options$element.model) === null || _this$options$element2 === void 0 ? void 0 : (_this$options$element3 = _this$options$element2.attributes) === null || _this$options$element3 === void 0 ? void 0 : _this$options$element3.elType) ? (_this$options2 = this.options) === null || _this$options2 === void 0 ? void 0 : (_this$options2$elemen = _this$options2.element) === null || _this$options2$elemen === void 0 ? void 0 : (_this$options2$elemen2 = _this$options2$elemen.model) === null || _this$options2$elemen2 === void 0 ? void 0 : (_this$options2$elemen3 = _this$options2$elemen2.attributes) === null || _this$options2$elemen3 === void 0 ? void 0 : _this$options2$elemen3.widgetType : (_this$options3 = this.options) === null || _this$options3 === void 0 ? void 0 : (_this$options3$elemen = _this$options3.element) === null || _this$options3$elemen === void 0 ? void 0 : (_this$options3$elemen2 = _this$options3$elemen.model) === null || _this$options3$elemen2 === void 0 ? void 0 : (_this$options3$elemen3 = _this$options3$elemen2.attributes) === null || _this$options3$elemen3 === void 0 ? void 0 : _this$options3$elemen3.elType;
+    return "".concat(elementType, "-").concat(controlName);
+  },
+  onDismissButtonClick: function onDismissButtonClick() {
+    var _this = this;
+    var dismissId = this.getDismissId();
+    elementorCommon.ajax.addRequest('dismissed_editor_notices', {
+      data: {
+        dismissId: dismissId
+      },
+      success: function success() {
+        var _elementor, _elementor$config, _elementor$config$use;
+        _this.$el.remove();
+        var dismissedNotices = (_elementor = elementor) !== null && _elementor !== void 0 && (_elementor$config = _elementor.config) !== null && _elementor$config !== void 0 && (_elementor$config$use = _elementor$config.user) !== null && _elementor$config$use !== void 0 && _elementor$config$use.dismissed_editor_notices ? (0, _toConsumableArray2.default)(elementor.config.user.dismissed_editor_notices) : [];
+        elementor.config.user.dismissed_editor_notices = [].concat((0, _toConsumableArray2.default)(dismissedNotices), [dismissId]);
+      }
+    });
+  },
+  templateHelpers: function templateHelpers() {
+    var _elementor2, _elementor2$config, _elementor2$config$us;
+    var controlData = ControlBaseView.prototype.templateHelpers.apply(this, arguments);
+    var dismissedNotices = (_elementor2 = elementor) !== null && _elementor2 !== void 0 && (_elementor2$config = _elementor2.config) !== null && _elementor2$config !== void 0 && (_elementor2$config$us = _elementor2$config.user) !== null && _elementor2$config$us !== void 0 && _elementor2$config$us.dismissed_editor_notices ? (0, _toConsumableArray2.default)(elementor.config.user.dismissed_editor_notices) : [];
+    var dismissId = this.getDismissId();
+    controlData.data.shouldRenderNotice = !dismissedNotices.includes(dismissId);
+    return controlData;
+  }
+});
 
 /***/ }),
 
@@ -18558,7 +18918,7 @@ var PasteArea = /*#__PURE__*/function (_$e$modules$editor$do) {
   }
   (0, _createClass2.default)(PasteArea, [{
     key: "getHistory",
-    value: function getHistory(args) {
+    value: function getHistory() {
       return false;
     }
   }, {
@@ -18578,7 +18938,7 @@ var PasteArea = /*#__PURE__*/function (_$e$modules$editor$do) {
         event.preventDefault();
       }).on('blur', function () {
         _.defer(function () {
-          return $inputArea.focus();
+          return $inputArea.trigger('focus');
         });
       }).on('paste', /*#__PURE__*/function () {
         var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(event) {
@@ -18639,9 +18999,9 @@ var PasteArea = /*#__PURE__*/function (_$e$modules$editor$do) {
           iconClass: 'eicon-close'
         },
         onShow: function onShow() {
-          $inputArea.focus();
+          $inputArea.trigger('focus');
           _this.getDialog().getElements('widgetContent').on('click', function () {
-            $inputArea.focus();
+            $inputArea.trigger('focus');
           });
         }
       });
@@ -21614,7 +21974,6 @@ var IsValidChild = /*#__PURE__*/function (_Dependency) {
         containers = _args$containers === void 0 ? [args.container] : _args$containers,
         _args$model = args.model,
         model = _args$model === void 0 ? {} : _args$model,
-        options = args.options,
         modelToCreate = new Backbone.Model(model);
       return containers.some(function ( /* Container */container) {
         return container.model.isValidChild(modelToCreate);
@@ -26868,6 +27227,7 @@ var _component3 = _interopRequireDefault(__webpack_require__(/*! ./document/comp
 var _component4 = _interopRequireDefault(__webpack_require__(/*! ./data/globals/component */ "../assets/dev/js/editor/data/globals/component.js"));
 var _controlConditions = _interopRequireDefault(__webpack_require__(/*! ./utils/control-conditions */ "../assets/dev/js/editor/utils/control-conditions.js"));
 var _module5 = _interopRequireDefault(__webpack_require__(/*! elementor/modules/promotions/assets/js/editor/module */ "../modules/promotions/assets/js/editor/module.js"));
+var _module6 = _interopRequireDefault(__webpack_require__(/*! elementor/modules/editor-events/assets/js/editor/module */ "../modules/editor-events/assets/js/editor/module.js"));
 var elementTypes = _interopRequireWildcard(__webpack_require__(/*! ./elements/types */ "../assets/dev/js/editor/elements/types/index.js"));
 var _elementBase = _interopRequireDefault(__webpack_require__(/*! ./elements/types/base/element-base */ "../assets/dev/js/editor/elements/types/base/element-base.js"));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -27019,6 +27379,7 @@ var EditorBase = /*#__PURE__*/function (_Marionette$Applicati) {
         Icons: __webpack_require__(/*! elementor-controls/icons */ "../assets/dev/js/editor/controls/icons.js"),
         Image_dimensions: __webpack_require__(/*! elementor-controls/image-dimensions */ "../assets/dev/js/editor/controls/image-dimensions.js"),
         Media: __webpack_require__(/*! elementor-controls/media */ "../assets/dev/js/editor/controls/media.js"),
+        Notice: __webpack_require__(/*! elementor-controls/notice */ "../assets/dev/js/editor/controls/notice.js"),
         Number: __webpack_require__(/*! elementor-controls/number */ "../assets/dev/js/editor/controls/number.js"),
         Popover_toggle: _popoverToggle.default,
         Repeater: __webpack_require__(/*! elementor-controls/repeater */ "../assets/dev/js/editor/controls/repeater.js"),
@@ -27219,6 +27580,7 @@ var EditorBase = /*#__PURE__*/function (_Marionette$Applicati) {
       this.promotion = new _promotion.default();
       this.browserImport = new _manager3.default();
       this.introductionTooltips = new _manager2.default();
+      this.editorEvents = new _module6.default();
       this.documents = $e.components.register(new _component.default());
 
       // Adds the Landing Page tab to the Template library modal when editing Landing Pages.
@@ -27272,16 +27634,26 @@ var EditorBase = /*#__PURE__*/function (_Marionette$Applicati) {
   }, {
     key: "initElements",
     value: function initElements() {
-      var ElementCollection = __webpack_require__(/*! elementor-elements/collections/elements */ "../assets/dev/js/editor/elements/collections/elements.js");
       var config = this.config.document.elements;
 
       // If it's an reload, use the not-saved data
       if (this.elements && this.elements.length && this.config.document.id === this.config.initial_document.id) {
         config = this.elements.toJSON();
       }
-      this.elements = new ElementCollection(config);
-      this.elementsModel = new Backbone.Model({
-        elements: this.elements
+      this.elements = this.createBackboneElementsCollection(config);
+      this.elementsModel = this.createBackboneElementsModel(this.elements);
+    }
+  }, {
+    key: "createBackboneElementsCollection",
+    value: function createBackboneElementsCollection(json) {
+      var ElementCollection = __webpack_require__(/*! elementor-elements/collections/elements */ "../assets/dev/js/editor/elements/collections/elements.js");
+      return new ElementCollection(json);
+    }
+  }, {
+    key: "createBackboneElementsModel",
+    value: function createBackboneElementsModel(elementsCollection) {
+      return new Backbone.Model({
+        elements: elementsCollection
       });
     }
   }, {
@@ -27297,6 +27669,7 @@ var EditorBase = /*#__PURE__*/function (_Marionette$Applicati) {
         this.$preview = $('<iframe>', {
           id: previewIframeId,
           src: this.config.initial_document.urls.preview,
+          title: __('Preview', 'elementor'),
           allowfullscreen: 1
         });
         this.$previewResponsiveWrapper.append(this.$preview);
@@ -27307,17 +27680,28 @@ var EditorBase = /*#__PURE__*/function (_Marionette$Applicati) {
     key: "initPreviewView",
     value: function initPreviewView(document) {
       elementor.trigger('document:before:preview', document);
+      this.previewView = this.createPreviewView(document.$element[0], elementor.elementsModel);
+      this.renderPreview(this.previewView);
+    }
+  }, {
+    key: "createPreviewView",
+    value: function createPreviewView(targetElement, model) {
+      var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var preview = new _preview.default({
-        el: document.$element[0],
-        model: elementor.elementsModel
+        el: targetElement,
+        model: model
       });
+      preview.setConfig(config);
       preview.$el.empty();
-
+      return preview;
+    }
+  }, {
+    key: "renderPreview",
+    value: function renderPreview(preview) {
       // In order to force rendering of children
       preview.isRendered = true;
       preview._renderChildren();
       preview.triggerMethod('render');
-      this.previewView = preview;
     }
   }, {
     key: "initFrontend",
@@ -27802,24 +28186,6 @@ var EditorBase = /*#__PURE__*/function (_Marionette$Applicati) {
       return elementorCommon.translate(stringKey, null, templateArgs, i18nStack);
     }
   }, {
-    key: "logSite",
-    value: function logSite() {
-      var text = '',
-        style = '';
-      if (_environment.default.firefox) {
-        var asciiText = [' ;;;;;;;;;;;;;;; ', ';;;  ;;       ;;;', ';;;  ;;;;;;;;;;;;', ';;;  ;;;;;;;;;;;;', ';;;  ;;       ;;;', ';;;  ;;;;;;;;;;;;', ';;;  ;;;;;;;;;;;;', ';;;  ;;       ;;;', ' ;;;;;;;;;;;;;;; '];
-        text += '%c' + asciiText.join('\n') + '\n';
-        style = 'color: #C42961';
-      } else {
-        text += '%c00';
-        style = 'font-size: 22px; background-image: url("' + elementorCommon.config.urls.assets + 'images/logo-icon.png"); color: transparent; background-repeat: no-repeat';
-      }
-      setTimeout(console.log.bind(console, text, style)); // eslint-disable-line
-
-      text = '%cLove using Elementor? Join our growing community of Elementor developers: %chttps://github.com/elementor/elementor';
-      setTimeout(console.log.bind(console, text, 'color: #9B0A46', '')); // eslint-disable-line
-    }
-  }, {
     key: "requestWidgetsConfig",
     value: function requestWidgetsConfig() {
       var _this6 = this;
@@ -27909,7 +28275,6 @@ var EditorBase = /*#__PURE__*/function (_Marionette$Applicati) {
         _events.default.dispatch(elementorCommon.elements.$window, 'elementor/init', null, 'elementor:init');
         _this8.initNavigator();
       });
-      this.logSite();
     }
   }, {
     key: "onPreviewLoaded",
@@ -31802,7 +32167,7 @@ var BaseElementView = __webpack_require__(/*! elementor-elements/views/base */ "
 ColumnView = BaseElementView.extend({
   template: Marionette.TemplateCache.get('#tmpl-elementor-column-content'),
   emptyView: ColumnEmptyView,
-  childViewContainer: elementorCommon.config.experimentalFeatures.e_dom_optimization ? '> .elementor-widget-wrap' : '> .elementor-column-wrap > .elementor-widget-wrap',
+  childViewContainer: '> .elementor-widget-wrap',
   toggleEditTools: true,
   behaviors: function behaviors() {
     var behaviors = BaseElementView.prototype.behaviors.apply(this, arguments);
@@ -31827,7 +32192,7 @@ ColumnView = BaseElementView.extend({
   },
   ui: function ui() {
     var ui = BaseElementView.prototype.ui.apply(this, arguments);
-    ui.columnInner = elementorCommon.config.experimentalFeatures.e_dom_optimization ? '> .elementor-widget-wrap' : '> .elementor-column-wrap';
+    ui.columnInner = '> .elementor-widget-wrap';
     ui.percentsTooltip = '> .elementor-element-overlay .elementor-column-percents-tooltip';
     return ui;
   },
@@ -31953,29 +32318,18 @@ ColumnView = BaseElementView.extend({
   },
   onRender: function onRender() {
     var _this = this;
-    var isDomOptimizationActive = elementorCommon.config.experimentalFeatures.e_dom_optimization,
-      getDropIndex = function getDropIndex(side, event) {
-        var newIndex = jQuery(event.currentTarget).index();
-
-        // Since 3.0.0, the `.elementor-background-overlay` element sit at the same level as widgets
-        if ('bottom' === side && !isDomOptimizationActive) {
-          newIndex++;
-        } else if ('top' === side && isDomOptimizationActive) {
-          newIndex--;
-        }
-        return newIndex;
-      };
-    var itemsClasses = '';
-    if (isDomOptimizationActive) {
-      itemsClasses = ' > .elementor-widget-wrap > .elementor-element, >.elementor-widget-wrap > .elementor-empty-view > .elementor-first-add';
-    } else {
-      itemsClasses = ' > .elementor-column-wrap > .elementor-widget-wrap > .elementor-element, >.elementor-column-wrap > .elementor-widget-wrap > .elementor-empty-view > .elementor-first-add';
-    }
+    var getDropIndex = function getDropIndex(side, event) {
+      var newIndex = jQuery(event.currentTarget).index();
+      if ('top' === side) {
+        newIndex--;
+      }
+      return newIndex;
+    };
     BaseElementView.prototype.onRender.apply(this, arguments);
     this.changeChildContainerClasses();
     this.changeSizeUI();
     this.$el.html5Droppable({
-      items: itemsClasses,
+      items: ' > .elementor-widget-wrap > .elementor-element, >.elementor-widget-wrap > .elementor-empty-view > .elementor-first-add',
       axis: ['vertical'],
       groups: ['elementor-element'],
       isDroppingAllowed: this.isDroppingAllowed.bind(this),
@@ -32241,7 +32595,6 @@ var ContainerView = BaseElementView.extend({
    * Add a `Save as Template` button to the context menu.
    *
    * @return {Object} groups
-   *
    */
   getContextMenuGroups: function getContextMenuGroups() {
     var _this2 = this;
@@ -32326,7 +32679,6 @@ var ContainerView = BaseElementView.extend({
    * Toggle the `New Section` view when clicking the `add` button in the edit tools.
    *
    * @return {void}
-   *
    */
   onAddButtonClick: function onAddButtonClick() {
     if (this.addSectionView && !this.addSectionView.isDestroyed) {
@@ -32411,6 +32763,7 @@ var ContainerView = BaseElementView.extend({
 
     /* Translators: %s: Element name. */
     jQuery('#elementor-panel-header-title').html(sprintf(__('Edit %s', 'elementor'), title));
+    this.updateNeedHelpLink();
   },
   getPanelTitle: function getPanelTitle() {
     return this.isFlexContainer() ? __('Container', 'elementor') : __('Grid', 'elementor');
@@ -32517,6 +32870,13 @@ var ContainerView = BaseElementView.extend({
       delete this._showingEmptyView; // Marionette property that needs to be falsy for showEmptyView() to fully execute.
       this.showEmptyView(); // Marionette function.
       this.handleGridEmptyView();
+    }
+  },
+  updateNeedHelpLink: function updateNeedHelpLink() {
+    var $linkElement = jQuery('#elementor-panel__editor__help__link');
+    var href = this.isGridContainer() ? 'https://go.elementor.com/widget-container-grid' : 'https://go.elementor.com/widget-container';
+    if ($linkElement) {
+      $linkElement.attr('href', href);
     }
   }
 });
@@ -32666,11 +33026,7 @@ var DEFAULT_INNER_SECTION_COLUMNS = 2,
   DEFAULT_MAX_COLUMNS = 10;
 var SectionView = BaseElementView.extend({
   childViewContainer: function childViewContainer() {
-    var containerSelector = '> .elementor-container';
-    if (!elementorCommon.config.experimentalFeatures.e_dom_optimization) {
-      containerSelector += ' > .elementor-row';
-    }
-    return containerSelector;
+    return '> .elementor-container';
   },
   template: Marionette.TemplateCache.get('#tmpl-elementor-section-content'),
   addSectionView: null,
@@ -32985,6 +33341,7 @@ var WidgetView = _baseWidget.default.extend({
         shortcut: jQuery('<i>', {
           class: 'eicon-pro-icon'
         }),
+        promotionURL: 'https://go.elementor.com/go-pro-global-widget-context-menu/',
         isEnabled: function isEnabled() {
           return 'global' !== _this.options.model.get('widgetType') && !elementor.selection.isMultiple();
         }
@@ -34041,7 +34398,7 @@ var _default = /*#__PURE__*/function (_Marionette$Composite) {
       if (this.isRoot()) {
         return;
       }
-      this.ui.item.css('padding-inline-start', this.getIndent());
+      this.ui.item.css('padding-inline-start', this.getIndent() + 'px');
       this.toggleHiddenClass();
       this.renderIndicators();
     }
@@ -36468,6 +36825,7 @@ PanelElementsLayoutView = Marionette.LayoutView.extend({
     });
     var categoriesCollection = new PanelElementsCategoriesCollection();
     _.each(elementor.config.document.panel.elements_categories, function (categoryConfig, categoryName) {
+      var _categoryConfig$promo;
       // Set defaults.
       if ('undefined' === typeof categoryConfig.active) {
         categoryConfig.active = true;
@@ -36482,7 +36840,8 @@ PanelElementsLayoutView = Marionette.LayoutView.extend({
         defaultActive: categoryConfig.active,
         sort: categoryConfig.sort,
         hideIfEmpty: undefined !== categoryConfig.hideIfEmpty ? categoryConfig.hideIfEmpty : true,
-        items: categories[categoryName]
+        items: categories[categoryName],
+        promotion: (_categoryConfig$promo = categoryConfig.promotion) !== null && _categoryConfig$promo !== void 0 ? _categoryConfig$promo : null
       });
     });
     this.categoriesCollection = categoriesCollection;
@@ -36964,6 +37323,7 @@ var PanelElementsSearchView = Marionette.ItemView.extend({
   template: '#tmpl-elementor-panel-element-search',
   localizedValue: '',
   localizedValueStore: new _localizedValueStore.default(),
+  tagName: 'search',
   id: 'elementor-panel-elements-search-wrapper',
   ui: {
     input: 'input'
@@ -37196,7 +37556,7 @@ PanelMenu.addAdminMenu = function () {
   PanelMenu.addItem({
     name: 'apps',
     icon: 'eicon-apps',
-    title: __('Apps', 'elementor'),
+    title: __('Add-ons', 'elementor'),
     type: 'link',
     link: elementor.config.admin_apps_url,
     newTab: true
@@ -37392,6 +37752,7 @@ module.exports = Marionette.CompositeView.extend({
 
 module.exports = Marionette.ItemView.extend({
   template: '#tmpl-elementor-panel-menu-item',
+  tagName: 'button',
   className: function className() {
     return 'elementor-panel-menu-item elementor-panel-menu-item-' + this.model.get('name');
   },
@@ -37642,7 +38003,7 @@ var ColorPicker = /*#__PURE__*/function (_elementorModules$Mod) {
       var _this4 = this;
       var _this$getSettings3 = this.getSettings(),
         classes = _this$getSettings3.classes;
-      this.$clearButton = jQuery('<div>', {
+      this.$clearButton = jQuery('<button>', {
         class: classes.clearButton + ' ' + classes.pickerTool
       }).html('<i class="eicon-undo"></i>');
       this.$clearButton.on('click', function () {
@@ -38216,7 +38577,8 @@ module.exports = elementorModules.Module.extend({
         iconShortcut: 'elementor-context-menu-list__item__icon',
         itemDisabled: 'elementor-context-menu-list__item--disabled',
         divider: 'elementor-context-menu-list__divider',
-        hidden: 'elementor-hidden'
+        hidden: 'elementor-hidden',
+        promotionLink: 'elementor-context-menu-list__item__shortcut--link-fullwidth'
       }
     };
   },
@@ -38289,7 +38651,17 @@ module.exports = elementorModules.Module.extend({
     action.$item.toggleClass(this.getSettings('classes.hidden'), !state);
   },
   toggleActionUsability: function toggleActionUsability(action, state) {
+    this.maybeAddPromotionLink(action);
     action.$item.toggleClass(this.getSettings('classes.itemDisabled'), !state);
+  },
+  maybeAddPromotionLink: function maybeAddPromotionLink(action) {
+    if (this.shouldAddPromotionLink(action)) {
+      var iconContainer = action.$item.find('div.elementor-context-menu-list__item__shortcut')[0];
+      iconContainer.insertAdjacentHTML('beforeend', "<a href='".concat(action.promotionURL, "' target=\"_blank\" class=\"").concat(this.getSettings('classes.promotionLink'), "\"></a>"));
+    }
+  },
+  shouldAddPromotionLink: function shouldAddPromotionLink(action) {
+    return !!(action.promotionURL && !action.$item.find('a.elementor-context-menu-list__item__shortcut--link-fullwidth')[0] && action.$item.find('i.eicon-pro-icon')[0]);
   },
   /**
    * Update the action title.
@@ -38926,18 +39298,37 @@ var FilesUploadHandler = /*#__PURE__*/function () {
       frame.uploader.uploader.param('uploadTypeCaller', 'elementor-wp-media-upload');
     }
   }, {
+    key: "getUnfilteredFilesNonAdminDialog",
+    value: function getUnfilteredFilesNonAdminDialog() {
+      return elementorCommon.dialogsManager.createWidget('alert', {
+        id: 'e-unfiltered-files-disabled-dialog',
+        headerMessage: __('Sorry, you can\'t upload that file yet', 'elementor'),
+        message: __('This is because JSON files may pose a security risk.', 'elementor') + '<br><br>' + __('To upload them anyway, ask the site administrator to enable unfiltered file uploads.', 'elementor'),
+        strings: {
+          confirm: __('Got it', 'elementor')
+        }
+      });
+    }
+  }, {
     key: "getUnfilteredFilesNotEnabledDialog",
     value: function getUnfilteredFilesNotEnabledDialog(callback) {
+      var elementorInstance = window.elementorAdmin || window.elementor;
+      if (!elementorInstance.config.user.is_administrator) {
+        return this.getUnfilteredFilesNonAdminDialog();
+      }
       var onConfirm = function onConfirm() {
         elementorCommon.ajax.addRequest('enable_unfiltered_files_upload', {}, true);
         elementorCommon.config.filesUpload.unfilteredFiles = true;
         callback();
       };
-      return elementor.helpers.getSimpleDialog('e-enable-unfiltered-files-dialog', __('Enable Unfiltered File Uploads', 'elementor'), __('Before you enable unfiltered files upload, note that such files include a security risk. Elementor does run a process to remove possible malicious code, but there is still risk involved when using such files.', 'elementor'), __('Enable', 'elementor'), onConfirm);
+      return elementorInstance.helpers.getSimpleDialog('e-enable-unfiltered-files-dialog', __('Enable Unfiltered File Uploads', 'elementor'), __('Before you enable unfiltered files upload, note that such files include a security risk. Elementor does run a process to remove possible malicious code, but there is still risk involved when using such files.', 'elementor'), __('Enable', 'elementor'), onConfirm);
     }
   }, {
     key: "getUnfilteredFilesNotEnabledImportTemplateDialog",
     value: function getUnfilteredFilesNotEnabledImportTemplateDialog(callback) {
+      if (!(window.elementorAdmin || window.elementor).config.user.is_administrator) {
+        return this.getUnfilteredFilesNonAdminDialog();
+      }
       return elementorCommon.dialogsManager.createWidget('confirm', {
         id: 'e-enable-unfiltered-files-dialog-import-template',
         headerMessage: __('Enable Unfiltered File Uploads', 'elementor'),
@@ -39273,7 +39664,7 @@ module.exports = {
       if ('panel' === returnType) {
         return '<' + tag + ' class="' + iconValue + '"></' + tag + '>';
       }
-      var tagUniqueID = tag + this.getUniqueID();
+      var tagUniqueID = tag + elementorCommon.helpers.getUniqueId();
       view.addRenderAttribute(tagUniqueID, attributes);
       view.addRenderAttribute(tagUniqueID, 'class', iconValue);
       var htmlTag = '<' + tag + ' ' + view.getRenderAttributeString(tagUniqueID) + '></' + tag + '>';
@@ -41829,11 +42220,17 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var BaseSectionsContainerView = __webpack_require__(/*! elementor-views/base-sections-container */ "../assets/dev/js/editor/views/base-sections-container.js");
 var Preview = BaseSectionsContainerView.extend({
+  config: {
+    allowEdit: true
+  },
   initialize: function initialize() {
     this.$childViewContainer = jQuery('<div>', {
       class: 'elementor-section-wrap'
     });
     BaseSectionsContainerView.prototype.initialize.apply(this, arguments);
+  },
+  setConfig: function setConfig(config) {
+    this.config = Object.assign(this.config, config);
   },
   getChildViewContainer: function getChildViewContainer() {
     return this.$childViewContainer;
@@ -41900,7 +42297,7 @@ var Preview = BaseSectionsContainerView.extend({
     }));
   },
   addElementFromPanel: function addElementFromPanel(options) {
-    if (elementor.helpers.maybeDisableWidget()) {
+    if (!this.config.allowEdit || elementor.helpers.maybeDisableWidget()) {
       return;
     }
     var isContainerActive = !!elementorCommon.config.experimentalFeatures.container;
@@ -41930,22 +42327,15 @@ var Preview = BaseSectionsContainerView.extend({
       id: historyId
     });
   },
+  shouldRenderAddNewSectionArea: function shouldRenderAddNewSectionArea() {
+    return this.config.allowEdit && elementor.userCan('design');
+  },
   onRender: function onRender() {
-    var $contentContainer;
-    if (elementorCommon.config.experimentalFeatures.e_dom_optimization) {
-      $contentContainer = this.$el;
-    } else {
-      var $inner = jQuery('<div>', {
-        class: 'elementor-inner'
-      });
-      this.$el.html($inner);
-      $contentContainer = $inner;
-    }
-    $contentContainer.html(this.$childViewContainer);
-    if (elementor.userCan('design')) {
+    this.$el.html(this.$childViewContainer);
+    if (this.shouldRenderAddNewSectionArea()) {
       var addNewSectionView = new _independent.default();
       addNewSectionView.render();
-      $contentContainer.append(addNewSectionView.$el);
+      this.$el.append(addNewSectionView.$el);
     }
   }
 });
@@ -42004,7 +42394,6 @@ var ArgsObject = /*#__PURE__*/function (_InstanceType) {
    * @param {{}}     args
    *
    * @throws {Error}
-   *
    */
   (0, _createClass2.default)(ArgsObject, [{
     key: "requireArgument",
@@ -42025,7 +42414,6 @@ var ArgsObject = /*#__PURE__*/function (_InstanceType) {
      * @param {{}}     args
      *
      * @throws {Error}
-     *
      */
   }, {
     key: "requireArgumentType",
@@ -42047,7 +42435,6 @@ var ArgsObject = /*#__PURE__*/function (_InstanceType) {
      * @param {{}}     args
      *
      * @throws {Error}
-     *
      */
   }, {
     key: "requireArgumentInstance",
@@ -42069,7 +42456,6 @@ var ArgsObject = /*#__PURE__*/function (_InstanceType) {
      * @param {{}}     args
      *
      * @throws {Error}
-     *
      */
   }, {
     key: "requireArgumentConstructor",
@@ -45887,6 +46273,14 @@ var Manager = /*#__PURE__*/function (_elementorModules$edi) {
         title: __('Site Settings', 'elementor'),
         type: 'page',
         callback: function callback() {
+          elementor.editorEvents.dispatchEvent({
+            action: elementor.editorEvents.config.actions.click,
+            type: elementor.editorEvents.config.types.button,
+            section: elementor.editorEvents.config.sections.topbar,
+            element_name: elementor.editorEvents.config.elementNames.siteSettings,
+            outcome: null,
+            entity: null
+          });
           $e.run('panel/global/open', {
             route: $e.routes.getHistory('panel').reverse()[0].route
           });
@@ -46219,9 +46613,9 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.buttonClose = exports.buttonBack = void 0;
 var arrowIconClass = 'eicon-chevron-' + (elementorCommon.config.isRTL ? 'right' : 'left');
-var buttonBack = "\n<div id=\"elementor-panel-header-kit-back\" class=\"elementor-header-button\">\n\t<i class=\"elementor-icon ".concat(arrowIconClass, " tooltip-target\" aria-hidden=\"true\" data-tooltip=\"{{ Back }}\"></i>\n\t<span class=\"elementor-screen-only\">{{ Back }}</span>\n</div>\n");
+var buttonBack = "\n<button id=\"elementor-panel-header-kit-back\" class=\"elementor-header-button\">\n\t<i class=\"elementor-icon ".concat(arrowIconClass, " tooltip-target\" aria-hidden=\"true\" data-tooltip=\"{{ Back }}\"></i>\n\t<span class=\"elementor-screen-only\">{{ Back }}</span>\n</button>\n");
 exports.buttonBack = buttonBack;
-var buttonClose = "\n<div id=\"elementor-panel-header-kit-close\" class=\"elementor-header-button\">\n\t<i class=\"elementor-icon eicon-close tooltip-target\" aria-hidden=\"true\" data-tooltip=\"{{ Close }}\"></i>\n\t<span class=\"elementor-screen-only\">{{ Close }}</span>\n</div>\n";
+var buttonClose = "\n<button id=\"elementor-panel-header-kit-close\" class=\"elementor-header-button\">\n\t<i class=\"elementor-icon eicon-close tooltip-target\" aria-hidden=\"true\" data-tooltip=\"{{ Close }}\"></i>\n\t<span class=\"elementor-screen-only\">{{ Close }}</span>\n</button>\n";
 exports.buttonClose = buttonClose;
 
 /***/ }),
@@ -46380,7 +46774,7 @@ var _get2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helper
 var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ "../node_modules/@babel/runtime/helpers/inherits.js"));
 var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js"));
 var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "../node_modules/@babel/runtime/helpers/getPrototypeOf.js"));
-var _repeaterRow = _interopRequireDefault(__webpack_require__(/*! ../../../../assets/dev/js/editor/controls/repeater-row */ "../assets/dev/js/editor/controls/repeater-row.js"));
+var _repeaterRow = _interopRequireDefault(__webpack_require__(/*! elementor-controls/repeater-row */ "../assets/dev/js/editor/controls/repeater-row.js"));
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 var _default = /*#__PURE__*/function (_RepeaterRow) {
@@ -46592,6 +46986,232 @@ var _default = /*#__PURE__*/function (_Repeater) {
   }]);
   return _default;
 }(_repeater.default);
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../modules/editor-events/assets/js/editor/event.js":
+/*!**********************************************************!*\
+  !*** ../modules/editor-events/assets/js/editor/event.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "../node_modules/@babel/runtime/helpers/classCallCheck.js"));
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "../node_modules/@babel/runtime/helpers/createClass.js"));
+var _uuid = __webpack_require__(/*! uuid */ "../node_modules/uuid/dist/commonjs-browser/index.js");
+var Event = /*#__PURE__*/function () {
+  function Event(data) {
+    (0, _classCallCheck2.default)(this, Event);
+    var time = Date.now();
+    this.setupMetadata(time);
+    this.setupPayload(data, time);
+  }
+  (0, _createClass2.default)(Event, [{
+    key: "setupPayload",
+    value: function setupPayload(extraData, time) {
+      var _elementor$config$edi, _elementor$config$edi2, _elementor$config$edi3, _elementor$config$edi4, _elementor$config$edi5, _elementor$config$edi6, _elementor$config$edi7;
+      var siteInfo = {
+        WpVersion: (_elementor$config$edi = elementor.config.editor_events) === null || _elementor$config$edi === void 0 ? void 0 : _elementor$config$edi.wp_version,
+        ClientId: (_elementor$config$edi2 = elementor.config.editor_events) === null || _elementor$config$edi2 === void 0 ? void 0 : _elementor$config$edi2.site_key,
+        AppVersion: (_elementor$config$edi3 = elementor.config.editor_events) === null || _elementor$config$edi3 === void 0 ? void 0 : _elementor$config$edi3.elementor_version,
+        UserAgent: (_elementor$config$edi4 = elementor.config.editor_events) === null || _elementor$config$edi4 === void 0 ? void 0 : _elementor$config$edi4.user_agent,
+        SiteLanguage: (_elementor$config$edi5 = elementor.config.editor_events) === null || _elementor$config$edi5 === void 0 ? void 0 : _elementor$config$edi5.site_language
+      };
+      this.payload = {
+        elementor_api_id: '',
+        userId: null,
+        subscriptionId: (_elementor$config$edi6 = elementor.config.editor_events) === null || _elementor$config$edi6 === void 0 ? void 0 : _elementor$config$edi6.subscription_id,
+        url: (_elementor$config$edi7 = elementor.config.editor_events) === null || _elementor$config$edi7 === void 0 ? void 0 : _elementor$config$edi7.site_url,
+        extra_data: JSON.stringify(extraData),
+        siteInfo: JSON.stringify(siteInfo),
+        created_at: time
+      };
+    }
+  }, {
+    key: "setupMetadata",
+    value: function setupMetadata(time) {
+      var _elementor$config$edi8;
+      this.metadata = {
+        type: 'editor_events',
+        action: 'update',
+        time: time,
+        schema_id: 1,
+        version: 1,
+        publisher_version: (_elementor$config$edi8 = elementor.config.editor_events) === null || _elementor$config$edi8 === void 0 ? void 0 : _elementor$config$edi8.elementor_version,
+        guid: (0, _uuid.v4)()
+      };
+    }
+  }]);
+  return Event;
+}();
+exports["default"] = Event;
+
+/***/ }),
+
+/***/ "../modules/editor-events/assets/js/editor/events-config.js":
+/*!******************************************************************!*\
+  !*** ../modules/editor-events/assets/js/editor/events-config.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var eventsConfig = {
+  actions: {
+    click: 'click'
+  },
+  sections: {
+    topbar: 'topbar'
+  },
+  elementNames: {
+    siteSettings: 'site_settings'
+  },
+  types: {
+    button: 'button'
+  }
+};
+var _default = eventsConfig;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../modules/editor-events/assets/js/editor/events-storage.js":
+/*!*******************************************************************!*\
+  !*** ../modules/editor-events/assets/js/editor/events-storage.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "../node_modules/@babel/runtime/helpers/classCallCheck.js"));
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "../node_modules/@babel/runtime/helpers/createClass.js"));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "../node_modules/@babel/runtime/helpers/defineProperty.js"));
+var EventsStorage = /*#__PURE__*/function () {
+  function EventsStorage() {
+    (0, _classCallCheck2.default)(this, EventsStorage);
+    (0, _defineProperty2.default)(this, "key", 'e_editor-events');
+  }
+  (0, _createClass2.default)(EventsStorage, [{
+    key: "set",
+    value: function set(event) {
+      var existingEvents = this.get();
+      existingEvents.push(event);
+      localStorage.setItem(this.key, JSON.stringify(existingEvents));
+    }
+  }, {
+    key: "get",
+    value: function get() {
+      var storageItem = localStorage.getItem(this.key);
+      if (!storageItem) {
+        return [];
+      }
+      return JSON.parse(storageItem);
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      localStorage.removeItem(this.key);
+    }
+  }]);
+  return EventsStorage;
+}();
+var _default = new EventsStorage();
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../modules/editor-events/assets/js/editor/module.js":
+/*!***********************************************************!*\
+  !*** ../modules/editor-events/assets/js/editor/module.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "../node_modules/@babel/runtime/helpers/classCallCheck.js"));
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "../node_modules/@babel/runtime/helpers/createClass.js"));
+var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ "../node_modules/@babel/runtime/helpers/inherits.js"));
+var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js"));
+var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "../node_modules/@babel/runtime/helpers/getPrototypeOf.js"));
+var _eventsStorage = _interopRequireDefault(__webpack_require__(/*! ./events-storage */ "../modules/editor-events/assets/js/editor/events-storage.js"));
+var _eventsConfig = _interopRequireDefault(__webpack_require__(/*! ./events-config */ "../modules/editor-events/assets/js/editor/events-config.js"));
+var _event = _interopRequireDefault(__webpack_require__(/*! ./event */ "../modules/editor-events/assets/js/editor/event.js"));
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+var _default = /*#__PURE__*/function (_elementorModules$Mod) {
+  (0, _inherits2.default)(_default, _elementorModules$Mod);
+  var _super = _createSuper(_default);
+  function _default() {
+    (0, _classCallCheck2.default)(this, _default);
+    return _super.apply(this, arguments);
+  }
+  (0, _createClass2.default)(_default, [{
+    key: "onInit",
+    value: function onInit() {
+      var _elementor$config$edi;
+      this.config = _eventsConfig.default;
+      if (!((_elementor$config$edi = elementor.config.editor_events) !== null && _elementor$config$edi !== void 0 && _elementor$config$edi.can_send_events)) {
+        return;
+      }
+      window.addEventListener('beforeunload', this.sendEvents());
+    }
+  }, {
+    key: "dispatchEvent",
+    value: function dispatchEvent(data) {
+      var _elementor$config$edi2;
+      if (!((_elementor$config$edi2 = elementor.config.editor_events) !== null && _elementor$config$edi2 !== void 0 && _elementor$config$edi2.can_send_events)) {
+        return;
+      }
+      var newEvent = new _event.default(data);
+      if (navigator.sendBeacon(elementor.config.editor_events.data_system_url, JSON.stringify(newEvent))) {
+        return;
+      }
+      _eventsStorage.default.set(newEvent);
+    }
+  }, {
+    key: "sendEvents",
+    value: function sendEvents() {
+      var events = _eventsStorage.default.get();
+      if (!events.length) {
+        return;
+      }
+      fetch(elementor.config.editor_events.data_system_url, {
+        body: JSON.stringify(events),
+        method: 'POST',
+        credentials: 'omit',
+        keepalive: true
+      }).then(function () {
+        _eventsStorage.default.clear();
+      });
+    }
+  }]);
+  return _default;
+}(elementorModules.Module);
 exports["default"] = _default;
 
 /***/ }),
@@ -48377,7 +48997,6 @@ var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtim
 var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ "../node_modules/@babel/runtime/helpers/inherits.js"));
 var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js"));
 var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "../node_modules/@babel/runtime/helpers/getPrototypeOf.js"));
-var _categoryEmptyView = _interopRequireDefault(__webpack_require__(/*! ../views/category-empty-view */ "../modules/favorites/assets/js/editor/types/widgets/views/category-empty-view.js"));
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 var PanelCategoryBehavior = /*#__PURE__*/function (_Marionette$Behavior) {
@@ -48406,51 +49025,6 @@ var PanelCategoryBehavior = /*#__PURE__*/function (_Marionette$Behavior) {
   return PanelCategoryBehavior;
 }(Marionette.Behavior);
 exports["default"] = PanelCategoryBehavior;
-
-/***/ }),
-
-/***/ "../modules/favorites/assets/js/editor/types/widgets/views/category-empty-view.js":
-/*!****************************************************************************************!*\
-  !*** ../modules/favorites/assets/js/editor/types/widgets/views/category-empty-view.js ***!
-  \****************************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "../node_modules/@babel/runtime/helpers/classCallCheck.js"));
-var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "../node_modules/@babel/runtime/helpers/createClass.js"));
-var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ "../node_modules/@babel/runtime/helpers/inherits.js"));
-var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js"));
-var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "../node_modules/@babel/runtime/helpers/getPrototypeOf.js"));
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-var _default = /*#__PURE__*/function (_Marionette$ItemView) {
-  (0, _inherits2.default)(_default, _Marionette$ItemView);
-  var _super = _createSuper(_default);
-  function _default() {
-    (0, _classCallCheck2.default)(this, _default);
-    return _super.apply(this, arguments);
-  }
-  (0, _createClass2.default)(_default, [{
-    key: "getTemplate",
-    value: function getTemplate() {
-      return '#tmpl-elementor-panel-elements-category-empty';
-    }
-  }, {
-    key: "className",
-    value: function className() {
-      return 'elementor-panel-category-items-empty';
-    }
-  }]);
-  return _default;
-}(Marionette.ItemView);
-exports["default"] = _default;
 
 /***/ }),
 
@@ -48952,6 +49526,11 @@ var _default = /*#__PURE__*/function (_Marionette$ItemView) {
     return _super.apply(this, arguments);
   }
   (0, _createClass2.default)(_default, [{
+    key: "tagName",
+    value: function tagName() {
+      return 'button';
+    }
+  }, {
     key: "getTemplate",
     value: function getTemplate() {
       return '#tmpl-elementor-panel-history-item';
@@ -50443,6 +51022,122 @@ function findChildContainerOrFail(container, index) {
 
 /***/ }),
 
+/***/ "../modules/promotions/assets/js/editor/behavior.js":
+/*!**********************************************************!*\
+  !*** ../modules/promotions/assets/js/editor/behavior.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+/* provided dependency */ var __ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n")["__"];
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "../node_modules/@babel/runtime/helpers/classCallCheck.js"));
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ "../node_modules/@babel/runtime/helpers/createClass.js"));
+var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ "../node_modules/@babel/runtime/helpers/inherits.js"));
+var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js"));
+var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "../node_modules/@babel/runtime/helpers/getPrototypeOf.js"));
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+var PromotionBehavior = /*#__PURE__*/function (_Marionette$Behavior) {
+  (0, _inherits2.default)(PromotionBehavior, _Marionette$Behavior);
+  var _super = _createSuper(PromotionBehavior);
+  function PromotionBehavior() {
+    (0, _classCallCheck2.default)(this, PromotionBehavior);
+    return _super.apply(this, arguments);
+  }
+  (0, _createClass2.default)(PromotionBehavior, [{
+    key: "ui",
+    value: function ui() {
+      return {
+        displayConditionsButton: '.eicon-flow.e-control-display-conditions-promotion',
+        scrollingEffectsButton: '.e-control-scrolling-effects-promotion',
+        mouseEffectsButton: '.e-control-mouse-effects-promotion',
+        stickyEffectsButton: '.e-control-sticky-effects-promotion'
+      };
+    }
+  }, {
+    key: "events",
+    value: function events() {
+      return {
+        'click @ui.displayConditionsButton': 'onClickControlButtonDisplayConditions',
+        'click @ui.scrollingEffectsButton': 'onClickControlButtonScrollingEffects',
+        'click @ui.mouseEffectsButton': 'onClickControlButtonMouseEffects',
+        'click @ui.stickyEffectsButton': 'onClickControlButtonStickyEffects'
+      };
+    }
+  }, {
+    key: "onClickControlButtonDisplayConditions",
+    value: function onClickControlButtonDisplayConditions(event) {
+      event.stopPropagation();
+      var dialogOptions = {
+        title: __('Display Conditions', 'elementor'),
+        content: __('Upgrade to Elementor Pro Advanced to get the Display Conditions Feature as well as additional professional and ecommerce widgets', 'elementor'),
+        targetElement: this.el,
+        actionButton: {
+          url: 'https://go.elementor.com/go-pro-display-conditions/',
+          text: __('Upgrade Now', 'elementor')
+        }
+      };
+      elementor.promotion.showDialog(dialogOptions);
+    }
+  }, {
+    key: "onClickControlButtonScrollingEffects",
+    value: function onClickControlButtonScrollingEffects(event) {
+      event.stopPropagation();
+      var dialogOptions = {
+        title: __('Scrolling Effects', 'elementor'),
+        content: __('Get Scrolling Effects such as <br /> vertical/horizontal scroll, transparency,<br /> and more with Elementor Pro.', 'elementor'),
+        targetElement: this.el,
+        actionButton: {
+          url: 'https://go.elementor.com/go-pro-scrolling-effects-advanced/',
+          text: __('Upgrade Now', 'elementor')
+        }
+      };
+      elementor.promotion.showDialog(dialogOptions);
+    }
+  }, {
+    key: "onClickControlButtonMouseEffects",
+    value: function onClickControlButtonMouseEffects(event) {
+      event.stopPropagation();
+      var dialogOptions = {
+        title: __('Mouse Effects', 'elementor'),
+        content: __('Add a Mouse Track or 3d Tilt effect with<br />Elementor Pro.', 'elementor'),
+        targetElement: this.el,
+        actionButton: {
+          url: 'https://go.elementor.com/go-pro-motion-effects-advanced/',
+          text: __('Upgrade Now', 'elementor')
+        }
+      };
+      elementor.promotion.showDialog(dialogOptions);
+    }
+  }, {
+    key: "onClickControlButtonStickyEffects",
+    value: function onClickControlButtonStickyEffects(event) {
+      event.stopPropagation();
+      var dialogOptions = {
+        title: __('Sticky', 'elementor'),
+        content: __('Make any element on your page sticky and<br />keep them in sight at the top or bottom of<br />the screen.', 'elementor'),
+        targetElement: this.el,
+        actionButton: {
+          url: 'https://go.elementor.com/go-pro-sticky-element-advanced/',
+          text: __('Upgrade Now', 'elementor')
+        }
+      };
+      elementor.promotion.showDialog(dialogOptions);
+    }
+  }]);
+  return PromotionBehavior;
+}(Marionette.Behavior);
+exports["default"] = PromotionBehavior;
+
+/***/ }),
+
 /***/ "../modules/promotions/assets/js/editor/module.js":
 /*!********************************************************!*\
   !*** ../modules/promotions/assets/js/editor/module.js ***!
@@ -50462,6 +51157,7 @@ var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtim
 var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/inherits */ "../node_modules/@babel/runtime/helpers/inherits.js"));
 var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/possibleConstructorReturn */ "../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js"));
 var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/getPrototypeOf */ "../node_modules/@babel/runtime/helpers/getPrototypeOf.js"));
+var _behavior = _interopRequireDefault(__webpack_require__(/*! ./behavior */ "../modules/promotions/assets/js/editor/behavior.js"));
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 var Module = /*#__PURE__*/function (_elementorModules$edi) {
@@ -50488,6 +51184,22 @@ var Module = /*#__PURE__*/function (_elementorModules$edi) {
         }
         return DefaultView;
       });
+      elementor.hooks.addFilter('controls/base/behaviors', this.registerControlBehavior);
+    }
+  }, {
+    key: "registerControlBehavior",
+    value: function registerControlBehavior(behaviors, view) {
+      var promotionsToSkip = ['display_conditions_pro', 'scrolling_effects_pro', 'mouse_effects_pro', 'sticky_pro'];
+      if (!promotionsToSkip.includes(view.options.model.get('name'))) {
+        return behaviors;
+      }
+      if (!behaviors) {
+        behaviors = {};
+      }
+      behaviors.promotions = {
+        behaviorClass: _behavior.default
+      };
+      return behaviors;
     }
   }]);
   return Module;
@@ -55112,6 +55824,1013 @@ var createStructuredSelector = function createStructuredSelector(selectors, sele
   });
   return resultSelector;
 };
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/index.js":
+/*!***********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/index.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+Object.defineProperty(exports, "NIL", ({
+  enumerable: true,
+  get: function get() {
+    return _nil.default;
+  }
+}));
+Object.defineProperty(exports, "parse", ({
+  enumerable: true,
+  get: function get() {
+    return _parse.default;
+  }
+}));
+Object.defineProperty(exports, "stringify", ({
+  enumerable: true,
+  get: function get() {
+    return _stringify.default;
+  }
+}));
+Object.defineProperty(exports, "v1", ({
+  enumerable: true,
+  get: function get() {
+    return _v.default;
+  }
+}));
+Object.defineProperty(exports, "v3", ({
+  enumerable: true,
+  get: function get() {
+    return _v2.default;
+  }
+}));
+Object.defineProperty(exports, "v4", ({
+  enumerable: true,
+  get: function get() {
+    return _v3.default;
+  }
+}));
+Object.defineProperty(exports, "v5", ({
+  enumerable: true,
+  get: function get() {
+    return _v4.default;
+  }
+}));
+Object.defineProperty(exports, "validate", ({
+  enumerable: true,
+  get: function get() {
+    return _validate.default;
+  }
+}));
+Object.defineProperty(exports, "version", ({
+  enumerable: true,
+  get: function get() {
+    return _version.default;
+  }
+}));
+
+var _v = _interopRequireDefault(__webpack_require__(/*! ./v1.js */ "../node_modules/uuid/dist/commonjs-browser/v1.js"));
+
+var _v2 = _interopRequireDefault(__webpack_require__(/*! ./v3.js */ "../node_modules/uuid/dist/commonjs-browser/v3.js"));
+
+var _v3 = _interopRequireDefault(__webpack_require__(/*! ./v4.js */ "../node_modules/uuid/dist/commonjs-browser/v4.js"));
+
+var _v4 = _interopRequireDefault(__webpack_require__(/*! ./v5.js */ "../node_modules/uuid/dist/commonjs-browser/v5.js"));
+
+var _nil = _interopRequireDefault(__webpack_require__(/*! ./nil.js */ "../node_modules/uuid/dist/commonjs-browser/nil.js"));
+
+var _version = _interopRequireDefault(__webpack_require__(/*! ./version.js */ "../node_modules/uuid/dist/commonjs-browser/version.js"));
+
+var _validate = _interopRequireDefault(__webpack_require__(/*! ./validate.js */ "../node_modules/uuid/dist/commonjs-browser/validate.js"));
+
+var _stringify = _interopRequireDefault(__webpack_require__(/*! ./stringify.js */ "../node_modules/uuid/dist/commonjs-browser/stringify.js"));
+
+var _parse = _interopRequireDefault(__webpack_require__(/*! ./parse.js */ "../node_modules/uuid/dist/commonjs-browser/parse.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/md5.js":
+/*!*********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/md5.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+/*
+ * Browser-compatible JavaScript MD5
+ *
+ * Modification of JavaScript MD5
+ * https://github.com/blueimp/JavaScript-MD5
+ *
+ * Copyright 2011, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * https://opensource.org/licenses/MIT
+ *
+ * Based on
+ * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
+ * Digest Algorithm, as defined in RFC 1321.
+ * Version 2.2 Copyright (C) Paul Johnston 1999 - 2009
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for more info.
+ */
+function md5(bytes) {
+  if (typeof bytes === 'string') {
+    const msg = unescape(encodeURIComponent(bytes)); // UTF8 escape
+
+    bytes = new Uint8Array(msg.length);
+
+    for (let i = 0; i < msg.length; ++i) {
+      bytes[i] = msg.charCodeAt(i);
+    }
+  }
+
+  return md5ToHexEncodedArray(wordsToMd5(bytesToWords(bytes), bytes.length * 8));
+}
+/*
+ * Convert an array of little-endian words to an array of bytes
+ */
+
+
+function md5ToHexEncodedArray(input) {
+  const output = [];
+  const length32 = input.length * 32;
+  const hexTab = '0123456789abcdef';
+
+  for (let i = 0; i < length32; i += 8) {
+    const x = input[i >> 5] >>> i % 32 & 0xff;
+    const hex = parseInt(hexTab.charAt(x >>> 4 & 0x0f) + hexTab.charAt(x & 0x0f), 16);
+    output.push(hex);
+  }
+
+  return output;
+}
+/**
+ * Calculate output length with padding and bit length
+ */
+
+
+function getOutputLength(inputLength8) {
+  return (inputLength8 + 64 >>> 9 << 4) + 14 + 1;
+}
+/*
+ * Calculate the MD5 of an array of little-endian words, and a bit length.
+ */
+
+
+function wordsToMd5(x, len) {
+  /* append padding */
+  x[len >> 5] |= 0x80 << len % 32;
+  x[getOutputLength(len) - 1] = len;
+  let a = 1732584193;
+  let b = -271733879;
+  let c = -1732584194;
+  let d = 271733878;
+
+  for (let i = 0; i < x.length; i += 16) {
+    const olda = a;
+    const oldb = b;
+    const oldc = c;
+    const oldd = d;
+    a = md5ff(a, b, c, d, x[i], 7, -680876936);
+    d = md5ff(d, a, b, c, x[i + 1], 12, -389564586);
+    c = md5ff(c, d, a, b, x[i + 2], 17, 606105819);
+    b = md5ff(b, c, d, a, x[i + 3], 22, -1044525330);
+    a = md5ff(a, b, c, d, x[i + 4], 7, -176418897);
+    d = md5ff(d, a, b, c, x[i + 5], 12, 1200080426);
+    c = md5ff(c, d, a, b, x[i + 6], 17, -1473231341);
+    b = md5ff(b, c, d, a, x[i + 7], 22, -45705983);
+    a = md5ff(a, b, c, d, x[i + 8], 7, 1770035416);
+    d = md5ff(d, a, b, c, x[i + 9], 12, -1958414417);
+    c = md5ff(c, d, a, b, x[i + 10], 17, -42063);
+    b = md5ff(b, c, d, a, x[i + 11], 22, -1990404162);
+    a = md5ff(a, b, c, d, x[i + 12], 7, 1804603682);
+    d = md5ff(d, a, b, c, x[i + 13], 12, -40341101);
+    c = md5ff(c, d, a, b, x[i + 14], 17, -1502002290);
+    b = md5ff(b, c, d, a, x[i + 15], 22, 1236535329);
+    a = md5gg(a, b, c, d, x[i + 1], 5, -165796510);
+    d = md5gg(d, a, b, c, x[i + 6], 9, -1069501632);
+    c = md5gg(c, d, a, b, x[i + 11], 14, 643717713);
+    b = md5gg(b, c, d, a, x[i], 20, -373897302);
+    a = md5gg(a, b, c, d, x[i + 5], 5, -701558691);
+    d = md5gg(d, a, b, c, x[i + 10], 9, 38016083);
+    c = md5gg(c, d, a, b, x[i + 15], 14, -660478335);
+    b = md5gg(b, c, d, a, x[i + 4], 20, -405537848);
+    a = md5gg(a, b, c, d, x[i + 9], 5, 568446438);
+    d = md5gg(d, a, b, c, x[i + 14], 9, -1019803690);
+    c = md5gg(c, d, a, b, x[i + 3], 14, -187363961);
+    b = md5gg(b, c, d, a, x[i + 8], 20, 1163531501);
+    a = md5gg(a, b, c, d, x[i + 13], 5, -1444681467);
+    d = md5gg(d, a, b, c, x[i + 2], 9, -51403784);
+    c = md5gg(c, d, a, b, x[i + 7], 14, 1735328473);
+    b = md5gg(b, c, d, a, x[i + 12], 20, -1926607734);
+    a = md5hh(a, b, c, d, x[i + 5], 4, -378558);
+    d = md5hh(d, a, b, c, x[i + 8], 11, -2022574463);
+    c = md5hh(c, d, a, b, x[i + 11], 16, 1839030562);
+    b = md5hh(b, c, d, a, x[i + 14], 23, -35309556);
+    a = md5hh(a, b, c, d, x[i + 1], 4, -1530992060);
+    d = md5hh(d, a, b, c, x[i + 4], 11, 1272893353);
+    c = md5hh(c, d, a, b, x[i + 7], 16, -155497632);
+    b = md5hh(b, c, d, a, x[i + 10], 23, -1094730640);
+    a = md5hh(a, b, c, d, x[i + 13], 4, 681279174);
+    d = md5hh(d, a, b, c, x[i], 11, -358537222);
+    c = md5hh(c, d, a, b, x[i + 3], 16, -722521979);
+    b = md5hh(b, c, d, a, x[i + 6], 23, 76029189);
+    a = md5hh(a, b, c, d, x[i + 9], 4, -640364487);
+    d = md5hh(d, a, b, c, x[i + 12], 11, -421815835);
+    c = md5hh(c, d, a, b, x[i + 15], 16, 530742520);
+    b = md5hh(b, c, d, a, x[i + 2], 23, -995338651);
+    a = md5ii(a, b, c, d, x[i], 6, -198630844);
+    d = md5ii(d, a, b, c, x[i + 7], 10, 1126891415);
+    c = md5ii(c, d, a, b, x[i + 14], 15, -1416354905);
+    b = md5ii(b, c, d, a, x[i + 5], 21, -57434055);
+    a = md5ii(a, b, c, d, x[i + 12], 6, 1700485571);
+    d = md5ii(d, a, b, c, x[i + 3], 10, -1894986606);
+    c = md5ii(c, d, a, b, x[i + 10], 15, -1051523);
+    b = md5ii(b, c, d, a, x[i + 1], 21, -2054922799);
+    a = md5ii(a, b, c, d, x[i + 8], 6, 1873313359);
+    d = md5ii(d, a, b, c, x[i + 15], 10, -30611744);
+    c = md5ii(c, d, a, b, x[i + 6], 15, -1560198380);
+    b = md5ii(b, c, d, a, x[i + 13], 21, 1309151649);
+    a = md5ii(a, b, c, d, x[i + 4], 6, -145523070);
+    d = md5ii(d, a, b, c, x[i + 11], 10, -1120210379);
+    c = md5ii(c, d, a, b, x[i + 2], 15, 718787259);
+    b = md5ii(b, c, d, a, x[i + 9], 21, -343485551);
+    a = safeAdd(a, olda);
+    b = safeAdd(b, oldb);
+    c = safeAdd(c, oldc);
+    d = safeAdd(d, oldd);
+  }
+
+  return [a, b, c, d];
+}
+/*
+ * Convert an array bytes to an array of little-endian words
+ * Characters >255 have their high-byte silently ignored.
+ */
+
+
+function bytesToWords(input) {
+  if (input.length === 0) {
+    return [];
+  }
+
+  const length8 = input.length * 8;
+  const output = new Uint32Array(getOutputLength(length8));
+
+  for (let i = 0; i < length8; i += 8) {
+    output[i >> 5] |= (input[i / 8] & 0xff) << i % 32;
+  }
+
+  return output;
+}
+/*
+ * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+ * to work around bugs in some JS interpreters.
+ */
+
+
+function safeAdd(x, y) {
+  const lsw = (x & 0xffff) + (y & 0xffff);
+  const msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+  return msw << 16 | lsw & 0xffff;
+}
+/*
+ * Bitwise rotate a 32-bit number to the left.
+ */
+
+
+function bitRotateLeft(num, cnt) {
+  return num << cnt | num >>> 32 - cnt;
+}
+/*
+ * These functions implement the four basic operations the algorithm uses.
+ */
+
+
+function md5cmn(q, a, b, x, s, t) {
+  return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b);
+}
+
+function md5ff(a, b, c, d, x, s, t) {
+  return md5cmn(b & c | ~b & d, a, b, x, s, t);
+}
+
+function md5gg(a, b, c, d, x, s, t) {
+  return md5cmn(b & d | c & ~d, a, b, x, s, t);
+}
+
+function md5hh(a, b, c, d, x, s, t) {
+  return md5cmn(b ^ c ^ d, a, b, x, s, t);
+}
+
+function md5ii(a, b, c, d, x, s, t) {
+  return md5cmn(c ^ (b | ~d), a, b, x, s, t);
+}
+
+var _default = md5;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/native.js":
+/*!************************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/native.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+const randomUUID = typeof crypto !== 'undefined' && crypto.randomUUID && crypto.randomUUID.bind(crypto);
+var _default = {
+  randomUUID
+};
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/nil.js":
+/*!*********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/nil.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _default = '00000000-0000-0000-0000-000000000000';
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/parse.js":
+/*!***********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/parse.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _validate = _interopRequireDefault(__webpack_require__(/*! ./validate.js */ "../node_modules/uuid/dist/commonjs-browser/validate.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function parse(uuid) {
+  if (!(0, _validate.default)(uuid)) {
+    throw TypeError('Invalid UUID');
+  }
+
+  let v;
+  const arr = new Uint8Array(16); // Parse ########-....-....-....-............
+
+  arr[0] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
+  arr[1] = v >>> 16 & 0xff;
+  arr[2] = v >>> 8 & 0xff;
+  arr[3] = v & 0xff; // Parse ........-####-....-....-............
+
+  arr[4] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
+  arr[5] = v & 0xff; // Parse ........-....-####-....-............
+
+  arr[6] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
+  arr[7] = v & 0xff; // Parse ........-....-....-####-............
+
+  arr[8] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
+  arr[9] = v & 0xff; // Parse ........-....-....-....-############
+  // (Use "/" to avoid 32-bit truncation when bit-shifting high-order bytes)
+
+  arr[10] = (v = parseInt(uuid.slice(24, 36), 16)) / 0x10000000000 & 0xff;
+  arr[11] = v / 0x100000000 & 0xff;
+  arr[12] = v >>> 24 & 0xff;
+  arr[13] = v >>> 16 & 0xff;
+  arr[14] = v >>> 8 & 0xff;
+  arr[15] = v & 0xff;
+  return arr;
+}
+
+var _default = parse;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/regex.js":
+/*!***********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/regex.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/rng.js":
+/*!*********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/rng.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = rng;
+// Unique ID creation requires a high quality random # generator. In the browser we therefore
+// require the crypto API and do not support built-in fallback to lower quality random number
+// generators (like Math.random()).
+let getRandomValues;
+const rnds8 = new Uint8Array(16);
+
+function rng() {
+  // lazy load so that environments that need to polyfill have a chance to do so
+  if (!getRandomValues) {
+    // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation.
+    getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
+
+    if (!getRandomValues) {
+      throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
+    }
+  }
+
+  return getRandomValues(rnds8);
+}
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/sha1.js":
+/*!**********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/sha1.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+// Adapted from Chris Veness' SHA1 code at
+// http://www.movable-type.co.uk/scripts/sha1.html
+function f(s, x, y, z) {
+  switch (s) {
+    case 0:
+      return x & y ^ ~x & z;
+
+    case 1:
+      return x ^ y ^ z;
+
+    case 2:
+      return x & y ^ x & z ^ y & z;
+
+    case 3:
+      return x ^ y ^ z;
+  }
+}
+
+function ROTL(x, n) {
+  return x << n | x >>> 32 - n;
+}
+
+function sha1(bytes) {
+  const K = [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6];
+  const H = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0];
+
+  if (typeof bytes === 'string') {
+    const msg = unescape(encodeURIComponent(bytes)); // UTF8 escape
+
+    bytes = [];
+
+    for (let i = 0; i < msg.length; ++i) {
+      bytes.push(msg.charCodeAt(i));
+    }
+  } else if (!Array.isArray(bytes)) {
+    // Convert Array-like to Array
+    bytes = Array.prototype.slice.call(bytes);
+  }
+
+  bytes.push(0x80);
+  const l = bytes.length / 4 + 2;
+  const N = Math.ceil(l / 16);
+  const M = new Array(N);
+
+  for (let i = 0; i < N; ++i) {
+    const arr = new Uint32Array(16);
+
+    for (let j = 0; j < 16; ++j) {
+      arr[j] = bytes[i * 64 + j * 4] << 24 | bytes[i * 64 + j * 4 + 1] << 16 | bytes[i * 64 + j * 4 + 2] << 8 | bytes[i * 64 + j * 4 + 3];
+    }
+
+    M[i] = arr;
+  }
+
+  M[N - 1][14] = (bytes.length - 1) * 8 / Math.pow(2, 32);
+  M[N - 1][14] = Math.floor(M[N - 1][14]);
+  M[N - 1][15] = (bytes.length - 1) * 8 & 0xffffffff;
+
+  for (let i = 0; i < N; ++i) {
+    const W = new Uint32Array(80);
+
+    for (let t = 0; t < 16; ++t) {
+      W[t] = M[i][t];
+    }
+
+    for (let t = 16; t < 80; ++t) {
+      W[t] = ROTL(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
+    }
+
+    let a = H[0];
+    let b = H[1];
+    let c = H[2];
+    let d = H[3];
+    let e = H[4];
+
+    for (let t = 0; t < 80; ++t) {
+      const s = Math.floor(t / 20);
+      const T = ROTL(a, 5) + f(s, b, c, d) + e + K[s] + W[t] >>> 0;
+      e = d;
+      d = c;
+      c = ROTL(b, 30) >>> 0;
+      b = a;
+      a = T;
+    }
+
+    H[0] = H[0] + a >>> 0;
+    H[1] = H[1] + b >>> 0;
+    H[2] = H[2] + c >>> 0;
+    H[3] = H[3] + d >>> 0;
+    H[4] = H[4] + e >>> 0;
+  }
+
+  return [H[0] >> 24 & 0xff, H[0] >> 16 & 0xff, H[0] >> 8 & 0xff, H[0] & 0xff, H[1] >> 24 & 0xff, H[1] >> 16 & 0xff, H[1] >> 8 & 0xff, H[1] & 0xff, H[2] >> 24 & 0xff, H[2] >> 16 & 0xff, H[2] >> 8 & 0xff, H[2] & 0xff, H[3] >> 24 & 0xff, H[3] >> 16 & 0xff, H[3] >> 8 & 0xff, H[3] & 0xff, H[4] >> 24 & 0xff, H[4] >> 16 & 0xff, H[4] >> 8 & 0xff, H[4] & 0xff];
+}
+
+var _default = sha1;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/stringify.js":
+/*!***************************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/stringify.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+exports.unsafeStringify = unsafeStringify;
+
+var _validate = _interopRequireDefault(__webpack_require__(/*! ./validate.js */ "../node_modules/uuid/dist/commonjs-browser/validate.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Convert array of 16 byte values to UUID string format of the form:
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ */
+const byteToHex = [];
+
+for (let i = 0; i < 256; ++i) {
+  byteToHex.push((i + 0x100).toString(16).slice(1));
+}
+
+function unsafeStringify(arr, offset = 0) {
+  // Note: Be careful editing this code!  It's been tuned for performance
+  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+  return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];
+}
+
+function stringify(arr, offset = 0) {
+  const uuid = unsafeStringify(arr, offset); // Consistency check for valid UUID.  If this throws, it's likely due to one
+  // of the following:
+  // - One or more input array values don't map to a hex octet (leading to
+  // "undefined" in the uuid)
+  // - Invalid input values for the RFC `version` or `variant` fields
+
+  if (!(0, _validate.default)(uuid)) {
+    throw TypeError('Stringified UUID is invalid');
+  }
+
+  return uuid;
+}
+
+var _default = stringify;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/v1.js":
+/*!********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/v1.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _rng = _interopRequireDefault(__webpack_require__(/*! ./rng.js */ "../node_modules/uuid/dist/commonjs-browser/rng.js"));
+
+var _stringify = __webpack_require__(/*! ./stringify.js */ "../node_modules/uuid/dist/commonjs-browser/stringify.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// **`v1()` - Generate time-based UUID**
+//
+// Inspired by https://github.com/LiosK/UUID.js
+// and http://docs.python.org/library/uuid.html
+let _nodeId;
+
+let _clockseq; // Previous uuid creation time
+
+
+let _lastMSecs = 0;
+let _lastNSecs = 0; // See https://github.com/uuidjs/uuid for API details
+
+function v1(options, buf, offset) {
+  let i = buf && offset || 0;
+  const b = buf || new Array(16);
+  options = options || {};
+  let node = options.node || _nodeId;
+  let clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq; // node and clockseq need to be initialized to random values if they're not
+  // specified.  We do this lazily to minimize issues related to insufficient
+  // system entropy.  See #189
+
+  if (node == null || clockseq == null) {
+    const seedBytes = options.random || (options.rng || _rng.default)();
+
+    if (node == null) {
+      // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
+      node = _nodeId = [seedBytes[0] | 0x01, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
+    }
+
+    if (clockseq == null) {
+      // Per 4.2.2, randomize (14 bit) clockseq
+      clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 0x3fff;
+    }
+  } // UUID timestamps are 100 nano-second units since the Gregorian epoch,
+  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
+  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
+  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
+
+
+  let msecs = options.msecs !== undefined ? options.msecs : Date.now(); // Per 4.2.1.2, use count of uuid's generated during the current clock
+  // cycle to simulate higher resolution clock
+
+  let nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1; // Time since last uuid creation (in msecs)
+
+  const dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 10000; // Per 4.2.1.2, Bump clockseq on clock regression
+
+  if (dt < 0 && options.clockseq === undefined) {
+    clockseq = clockseq + 1 & 0x3fff;
+  } // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
+  // time interval
+
+
+  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
+    nsecs = 0;
+  } // Per 4.2.1.2 Throw error if too many uuids are requested
+
+
+  if (nsecs >= 10000) {
+    throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
+  }
+
+  _lastMSecs = msecs;
+  _lastNSecs = nsecs;
+  _clockseq = clockseq; // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
+
+  msecs += 12219292800000; // `time_low`
+
+  const tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
+  b[i++] = tl >>> 24 & 0xff;
+  b[i++] = tl >>> 16 & 0xff;
+  b[i++] = tl >>> 8 & 0xff;
+  b[i++] = tl & 0xff; // `time_mid`
+
+  const tmh = msecs / 0x100000000 * 10000 & 0xfffffff;
+  b[i++] = tmh >>> 8 & 0xff;
+  b[i++] = tmh & 0xff; // `time_high_and_version`
+
+  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
+
+  b[i++] = tmh >>> 16 & 0xff; // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
+
+  b[i++] = clockseq >>> 8 | 0x80; // `clock_seq_low`
+
+  b[i++] = clockseq & 0xff; // `node`
+
+  for (let n = 0; n < 6; ++n) {
+    b[i + n] = node[n];
+  }
+
+  return buf || (0, _stringify.unsafeStringify)(b);
+}
+
+var _default = v1;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/v3.js":
+/*!********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/v3.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _v = _interopRequireDefault(__webpack_require__(/*! ./v35.js */ "../node_modules/uuid/dist/commonjs-browser/v35.js"));
+
+var _md = _interopRequireDefault(__webpack_require__(/*! ./md5.js */ "../node_modules/uuid/dist/commonjs-browser/md5.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const v3 = (0, _v.default)('v3', 0x30, _md.default);
+var _default = v3;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/v35.js":
+/*!*********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/v35.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.URL = exports.DNS = void 0;
+exports["default"] = v35;
+
+var _stringify = __webpack_require__(/*! ./stringify.js */ "../node_modules/uuid/dist/commonjs-browser/stringify.js");
+
+var _parse = _interopRequireDefault(__webpack_require__(/*! ./parse.js */ "../node_modules/uuid/dist/commonjs-browser/parse.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function stringToBytes(str) {
+  str = unescape(encodeURIComponent(str)); // UTF8 escape
+
+  const bytes = [];
+
+  for (let i = 0; i < str.length; ++i) {
+    bytes.push(str.charCodeAt(i));
+  }
+
+  return bytes;
+}
+
+const DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+exports.DNS = DNS;
+const URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
+exports.URL = URL;
+
+function v35(name, version, hashfunc) {
+  function generateUUID(value, namespace, buf, offset) {
+    var _namespace;
+
+    if (typeof value === 'string') {
+      value = stringToBytes(value);
+    }
+
+    if (typeof namespace === 'string') {
+      namespace = (0, _parse.default)(namespace);
+    }
+
+    if (((_namespace = namespace) === null || _namespace === void 0 ? void 0 : _namespace.length) !== 16) {
+      throw TypeError('Namespace must be array-like (16 iterable integer values, 0-255)');
+    } // Compute hash of namespace and value, Per 4.3
+    // Future: Use spread syntax when supported on all platforms, e.g. `bytes =
+    // hashfunc([...namespace, ... value])`
+
+
+    let bytes = new Uint8Array(16 + value.length);
+    bytes.set(namespace);
+    bytes.set(value, namespace.length);
+    bytes = hashfunc(bytes);
+    bytes[6] = bytes[6] & 0x0f | version;
+    bytes[8] = bytes[8] & 0x3f | 0x80;
+
+    if (buf) {
+      offset = offset || 0;
+
+      for (let i = 0; i < 16; ++i) {
+        buf[offset + i] = bytes[i];
+      }
+
+      return buf;
+    }
+
+    return (0, _stringify.unsafeStringify)(bytes);
+  } // Function#name is not settable on some platforms (#270)
+
+
+  try {
+    generateUUID.name = name; // eslint-disable-next-line no-empty
+  } catch (err) {} // For CommonJS default export support
+
+
+  generateUUID.DNS = DNS;
+  generateUUID.URL = URL;
+  return generateUUID;
+}
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/v4.js":
+/*!********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/v4.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _native = _interopRequireDefault(__webpack_require__(/*! ./native.js */ "../node_modules/uuid/dist/commonjs-browser/native.js"));
+
+var _rng = _interopRequireDefault(__webpack_require__(/*! ./rng.js */ "../node_modules/uuid/dist/commonjs-browser/rng.js"));
+
+var _stringify = __webpack_require__(/*! ./stringify.js */ "../node_modules/uuid/dist/commonjs-browser/stringify.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function v4(options, buf, offset) {
+  if (_native.default.randomUUID && !buf && !options) {
+    return _native.default.randomUUID();
+  }
+
+  options = options || {};
+
+  const rnds = options.random || (options.rng || _rng.default)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+
+
+  rnds[6] = rnds[6] & 0x0f | 0x40;
+  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
+
+  if (buf) {
+    offset = offset || 0;
+
+    for (let i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+
+    return buf;
+  }
+
+  return (0, _stringify.unsafeStringify)(rnds);
+}
+
+var _default = v4;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/v5.js":
+/*!********************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/v5.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _v = _interopRequireDefault(__webpack_require__(/*! ./v35.js */ "../node_modules/uuid/dist/commonjs-browser/v35.js"));
+
+var _sha = _interopRequireDefault(__webpack_require__(/*! ./sha1.js */ "../node_modules/uuid/dist/commonjs-browser/sha1.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const v5 = (0, _v.default)('v5', 0x50, _sha.default);
+var _default = v5;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/validate.js":
+/*!**************************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/validate.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _regex = _interopRequireDefault(__webpack_require__(/*! ./regex.js */ "../node_modules/uuid/dist/commonjs-browser/regex.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function validate(uuid) {
+  return typeof uuid === 'string' && _regex.default.test(uuid);
+}
+
+var _default = validate;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ "../node_modules/uuid/dist/commonjs-browser/version.js":
+/*!*************************************************************!*\
+  !*** ../node_modules/uuid/dist/commonjs-browser/version.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _validate = _interopRequireDefault(__webpack_require__(/*! ./validate.js */ "../node_modules/uuid/dist/commonjs-browser/validate.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function version(uuid) {
+  if (!(0, _validate.default)(uuid)) {
+    throw TypeError('Invalid UUID');
+  }
+
+  return parseInt(uuid.slice(14, 15), 16);
+}
+
+var _default = version;
+exports["default"] = _default;
 
 /***/ }),
 

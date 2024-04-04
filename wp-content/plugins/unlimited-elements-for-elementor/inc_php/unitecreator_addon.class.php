@@ -24,6 +24,7 @@ class UniteCreatorAddonWork extends UniteElementsBaseUC{
 	const OPERATION_EDIT = "edit";
 	const OPERATION_WIDGET = "widget";
 
+
 	private $id = null;
 	private $isInited = false;
 	private $title, $type, $html, $htmlItem, $htmlItem2, $css, $cssItem, $js, $updateHash;
@@ -79,8 +80,7 @@ class UniteCreatorAddonWork extends UniteElementsBaseUC{
 			self::$defaultOptions = array();
 	}
 
-	protected function a_______INIT_VALIDATE_____(){
-	}
+	protected function a_______INIT_VALIDATE_____(){}
 
 	/**
 	 *
@@ -449,7 +449,7 @@ class UniteCreatorAddonWork extends UniteElementsBaseUC{
 	 * get special items type accordign the params
 	 */
 	protected function getItemsSpecialType(){
-
+		
 		foreach($this->params as $param){
 			$type = UniteFunctionsUC::getVal($param, "type");
 
@@ -1658,7 +1658,120 @@ class UniteCreatorAddonWork extends UniteElementsBaseUC{
 
 		return ($data);
 	}
+	
+	/**
+	 * has listing param with property
+	 * not_remote / multisource / remote_parent
+	 */
+	private function hasListingProperty($property){
+		
+		$arrParams = $this->getParams(UniteCreatorDialogParam::PARAM_LISTING);
+		
+		if(empty($arrParams))
+			return(false);
+		
+		foreach($arrParams as $param){
+			
+			$type = UniteFunctionsUC::getVal($param, "type");
+			
+			if($type != UniteCreatorDialogParam::PARAM_LISTING)
+				continue;
+			
+			$userFor = UniteFunctionsUC::getVal($param, "use_for");
+			
+			switch($property){
+				case "not_remote":
+					if($userFor != "remote")
+						return(true);
+				break;
+				case "multisource":
+					
+					if($userFor == "items")
+						return(true);
+				break;
+				case "remote_parent":
+					
+					if($userFor != "remote")
+						return(false);
+					
+					$remoteType = UniteFunctionsUC::getVal($param, "remote_type");
+					
+					if($remoteType == "parent")
+						return(true);
+				break;
+				default:
+					UniteFunctionsUC::throwError("wrong property: ". $property);
+				break;
+			}
+			
+		}
+		
+		return(false);
+	}
+	
+	/**
+	 * check if the addon has sequence animation special param
+	 */
+	public function hasSequenceAnimation(){
+		
+		$arrParams = $this->getParams(UniteCreatorDialogParam::PARAM_SPECIAL);
+		
+		if(empty($arrParams))
+			return(false);
+		
+		foreach($arrParams as $param){
+			
+			$type = UniteFunctionsUC::getVal($param, "attribute_type");
+			
+			if($type == "entrance_animation")
+				return(true);
+		}
+		
+		return(false);
+	}
+	
+	
+	/**
+	 * check if this addon supports ajax
+	 */
+	public function isAjaxEnabled(){
+		
+		$postList = $this->getParamByType(UniteCreatorDialogParam::PARAM_POSTS_LIST);
 
+		//listing types: template / gallery / items allow posts and ajax
+		
+		$hasListingNotRemote = $this->hasListingProperty("not_remote");
+		
+		if($hasListingNotRemote == true)
+			return(true);
+		
+		//post list that use ajax
+		
+		$postList = $this->getParamByType(UniteCreatorDialogParam::PARAM_POSTS_LIST);
+		
+		if(empty($postList))
+			return(false);
+			
+		$isAjaxEnabled = UniteFunctionsUC::getVal($postList, "enable_ajax");
+		$isAjaxEnabled = UniteFunctionsUC::strToBool($isAjaxEnabled);
+		
+		
+		return($isAjaxEnabled);
+	}
+	
+
+	/**
+	 * return if the addon has multisource
+	 */
+	public function hasRemoteParent(){
+		
+		$hasRemote = $this->hasListingProperty("remote_parent");
+		
+		return($hasRemote);
+	}
+	
+	
+	
 	private function a_______GET__INCLUDES_____(){
 	}
 
@@ -2198,11 +2311,38 @@ class UniteCreatorAddonWork extends UniteElementsBaseUC{
 	}
 
 	/**
+	 * check if there are relevant array param values, that starts with a "name_"
+	 * retur nthe value anyway
+	 */
+	private function getArrayParamValues($value, $param, $name, $arrValues){
+		
+		$outputValues = array();
+		
+		foreach($arrValues as $key=>$outputValue){
+			
+			if(strpos($key,"{$name}_") !== 0)
+				continue;
+			
+			$outputKey = substr($key, strlen($name)+1);
+			
+			$outputValues[$outputKey] = $outputValue;
+		}
+
+		
+		if(empty($outputValues))
+			return($value);
+		
+			
+		return($outputValues);
+	}
+	
+	
+	/**
 	 * set params values work
 	 * type: main,items
 	 */
 	private function setParamsValuesWork($arrValues, $arrParams, $type){
-
+				
 		$this->validateInited();
 		
 		if(empty($arrValues))
@@ -2211,32 +2351,39 @@ class UniteCreatorAddonWork extends UniteElementsBaseUC{
 		if(!is_array($arrValues))
 			UniteFunctionsUC::throwError("The values shoud be array");
 		
-		
 			
 		foreach($arrParams as $key => $param){
 			$name = UniteFunctionsUC::getVal($param, "name");
 
 			if(empty($name))
 				continue;
-
+			
 			$defaultValue = UniteFunctionsUC::getVal($param, "default_value");
-
+			
 			$type = UniteFunctionsUC::getVal($param, "type");
-
+			
 			$value = UniteFunctionsUC::getVal($arrValues, $name, $defaultValue);
-
+						
+			//multiple values - like post list
+			
 			$value = $this->objProcessor->getSpecialParamValue($type, $name, $value, $arrValues);
-
+			
+			//check for array type
+			if(isset($param["default_value"]) == false && empty($value)){
+				
+				$value = $this->getArrayParamValues($value, $param, $name, $arrValues);
+			}
+			
 			$param["value"] = $value;
 
 			$param = $this->setResponsiveParamValues($param, $name, $arrValues);
-
+			
 			$param = $this->objProcessor->setExtraParamsValues($type, $param, $name, $arrValues);
-
+			
 			//set responsive values
 			$arrParams[$key] = $param;
 		}
-
+				
 		return ($arrParams);
 	}
 

@@ -805,6 +805,7 @@ class UniteCreatorAddonView{
 						<?php esc_html_e("Clear", "unlimited-elements-for-elementor"); ?>
 					</button>
 					<button
+						id="uc-changelogs-form-submit"
 						class="uc-changelogs-form-submit unite-button-primary"
 						data-text-default="<?php esc_attr_e("Save", "unlimited-elements-for-elementor"); ?>"
 						data-text-loading="<?php esc_attr_e("Saving...", "unlimited-elements-for-elementor"); ?>"
@@ -1682,7 +1683,7 @@ class UniteCreatorAddonView{
 		$options["url_preview"] = $this->objAddon->getUrlPreview();
 
 		$arrThumbSizes = $this->getThumbSizes();
-
+				
 		$options["thumb_sizes"] = $arrThumbSizes;
 
 		$arrImageAddFields = $this->getImageAddFields();

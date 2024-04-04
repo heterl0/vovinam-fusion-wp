@@ -268,6 +268,9 @@ class UniteCreatorLayoutsExporterElementor extends UniteCreatorLayoutsExporter{
 				
 		$objLocal = new Elementor\TemplateLibrary\Source_Local();
 		
+		//flag that it's importing mode
+		GlobalsUnlimitedElements::$isImporting = true;
+		
 		$response = $objLocal->import_template( $filename, $importedFilepath );
 		
 		$newTemplateID = $this->importElementorTemplateNew_getTemplateID($response);
@@ -356,7 +359,13 @@ class UniteCreatorLayoutsExporterElementor extends UniteCreatorLayoutsExporter{
 				
 		$this->extractImportLayoutFile($filepath);
 		
+		//filetype validation
 		
+		$objAssets = new UniteCreatorAssets();
+		$objAssets->deleteFilesInExtracted($this->pathImportLayout);
+		$objAssets->validateAllowedFilesInExtracted($this->pathImportLayout);
+		
+				
 		//prepare the content and the json file path after extracted before import 
 		$this->importElementorTemplateNew_prepareLayoutImportContent();
 		
@@ -710,7 +719,10 @@ class UniteCreatorLayoutsExporterElementor extends UniteCreatorLayoutsExporter{
 		
 		if(!empty($arrImageData)){
 			
-			$arrImage["url"] = UniteFunctionsUC::getVal($arrImageData, "urlfull");
+			//important for not letting duplicate images in the media library
+			
+			//$arrImage["url"] = UniteFunctionsUC::getVal($arrImageData, "urlfull");
+			$arrImage["url"] = "";
 			$arrImage["id"] = UniteFunctionsUC::getVal($arrImageData, "imageid");
 			
 			return($arrImage);

@@ -15,7 +15,6 @@ class UniteCreatorActions{
 	 */
 	protected function onUpdateLayoutResponse($response){
 
-
 		$isUpdate = $response["is_update"];
 
 		//create
@@ -64,11 +63,10 @@ class UniteCreatorActions{
 	public function onAjaxAction(){
 
 		if(GlobalsUC::$inDev == true || GlobalsUC::$debugAjaxErrors == true){
+
 			ini_set("display_errors", "on");
 			error_reporting(E_ALL);
-
 		}
-
 
 		$actionType = UniteFunctionsUC::getPostGetVariable("action", "", UniteFunctionsUC::SANITIZE_KEY);
 
@@ -76,6 +74,9 @@ class UniteCreatorActions{
 			return (false);
 
 		$action = UniteFunctionsUC::getPostGetVariable("client_action", "", UniteFunctionsUC::SANITIZE_KEY);
+
+		GlobalsUC::$ajaxAction = $action;
+
 
 		//check front actions
 		switch($action){
@@ -101,10 +102,12 @@ class UniteCreatorActions{
 		$data = UniteProviderFunctionsUC::normalizeAjaxInputData($data);
 
 		try{
-			if(method_exists("UniteProviderFunctionsUC", "verifyNonce")){
-				$nonce = UniteFunctionsUC::getPostGetVariable("nonce", "", UniteFunctionsUC::SANITIZE_NOTHING);
-				UniteProviderFunctionsUC::verifyNonce($nonce);
-			}
+
+			//protection - it's intended to logged in users only with the capabilities defined in the plugin
+
+			$nonce = UniteFunctionsUC::getPostGetVariable("nonce", "", UniteFunctionsUC::SANITIZE_NOTHING);
+			UniteProviderFunctionsUC::verifyNonce($nonce);
+
 
 			switch($action){
 				case "remove_category":
@@ -437,6 +440,16 @@ class UniteCreatorActions{
 						HelperUC::ajaxResponseSuccess(HelperUC::getText("layout_imported"));
 
 				break;
+				case "get_image_url":
+				
+					HelperProviderUC::verifyAdminPermission();
+				
+					$id = UniteFunctionsUC::getVal($data, "id");
+					$size = UniteFunctionsUC::getVal($data, "size", "full");
+					$url = UniteProviderFunctionsUC::getImageUrlFromImageID($id, $size);
+
+					HelperUC::ajaxResponseData(array("url" => $url));
+				break;
 				case "get_version_text":
 
 					$content = HelperHtmlUC::getVersionText();
@@ -536,7 +549,9 @@ class UniteCreatorActions{
 					$response = $webAPI->checkUpdateCatalog($isForce);
 
 					$operations->checkInstagramRenewToken();
-
+										
+					do_action("ue_on_check_catalog_ajax_action");
+										
 					HelperUC::ajaxResponseData($response);
 				break;
 				case "install_catalog_addon":
@@ -601,6 +616,13 @@ class UniteCreatorActions{
 
 					HelperUC::ajaxResponseSuccess(esc_html__("Settings Saved", "unlimited-elements-for-elementor"));
 				break;
+				case "get_users_list_forselect":
+
+					$arrUsersList = $operations->getUsersListForSelectFromData($data);
+
+					HelperUC::ajaxResponseData($arrUsersList);
+
+				break;
 				case "get_terms_list_forselect":
 
 					$arrTermsList = $operations->getTermsListForSelectFromData($data);
@@ -623,6 +645,12 @@ class UniteCreatorActions{
 				case "get_select2_terms_titles":
 
 					$arrData = $operations->getSelect2TermsTitles($data);
+
+					HelperUC::ajaxResponseData(array("select2_data" => $arrData));
+				break;
+				case "get_select2_users_titles":
+
+					$arrData = $operations->getSelect2UsersTitles($data);
 
 					HelperUC::ajaxResponseData(array("select2_data" => $arrData));
 				break;

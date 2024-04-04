@@ -13,9 +13,7 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 	const TYPE_ITEMS = "items";
 	const INSTAGRAM_DEFAULT_VALUE = "@gianlucavacchi";
 
-
 	//additional attributes that allowed to add to regular settings from params
-
 	protected $arrAddAttributes = array(
 		"simple_mode",
 		"all_cats_mode",
@@ -30,11 +28,10 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 	);
 
 	private $currentAddon;
+	private $currentTabs;
 
 
 	private function a___________GETTERS_________(){}
-
-
 
 	/**
 	 * get settings in creator format
@@ -197,9 +194,6 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 	 */
 	public function addImage($name,$defaultValue = "",$text = "",$arrParams = array()){
 
-		if(empty($defaultValue))
-			$defaultValue = GlobalsUC::$url_no_image_placeholder;
-
 		parent::addImage($name, $defaultValue, $text, $arrParams);
 
 		//check the source param
@@ -272,7 +266,7 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 	/**
 	 * add template picker
 	 */
-	protected function addTemplatePicker($name,$value,$title,$extra){
+	protected function addTemplatePicker($name, $value, $title, $extra){
 
 		dmp("addTemplatePicker - function for override");
 		exit();
@@ -281,34 +275,29 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 	/**
 	 * add post list picker
 	 */
-	protected function addPostsListPicker($name,$value,$title,$extra){
+	protected function addPostsListPicker($name, $value, $title, $extra){
+
 		dmp("addPostsListPicker - function for override");
 		exit();
 	}
 
-
 	/**
 	 * add background settings
 	 */
-	protected function addBackgroundSettings($name,$value,$title,$param){
-
-
+	protected function addBackgroundSettings($name, $value, $title, $param, $extra){
 
 		dmp("addBackgroundSettings - function for override");
 		exit();
 	}
 
-
 	/**
 	 * add menu picker
 	 */
-	protected function addMenuPicker($name,$value,$title,$extra){
+	protected function addMenuPicker($name, $value, $title, $extra){
 
 		dmp("addMenuPicker - function for override");
 		exit();
 	}
-
-
 
 	/**
 	 * add instagram selector
@@ -450,20 +439,99 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 	/**
 	 * add typography setting
 	 */
-	public function addTypographySetting($name, $value, $title, $extra){
+	public function addTypographySetting($name, $value, $title, $params = array()){
 
-		$this->add($name,$value,$title,self::TYPE_TYPOGRAPHY,$extra);
-
+		$this->add($name, $value, $title, self::TYPE_TYPOGRAPHY, $params);
 	}
 
+	/**
+	 * add text shadow setting
+	 */
+	public function addTextShadowSetting($name, $value, $title, $params = array()){
+
+		$this->add($name, $value, $title, self::TYPE_TEXTSHADOW, $params);
+	}
+
+	/**
+	 * add box shadow setting
+	 */
+	public function addBoxShadowSetting($name, $value, $title, $params = array()){
+
+		$this->add($name, $value, $title, self::TYPE_BOXSHADOW, $params);
+	}
+
+	/**
+	 * add css filters setting
+	 */
+	public function addCssFiltersSetting($name, $value, $title, $params = array()){
+
+		$this->add($name, $value, $title, self::TYPE_CSS_FILTERS, $params);
+	}
 
 	/**
 	 * add dimentions setting
 	 */
-	public function addDimentionsSetting($name, $value, $title, $extra){
+	public function addDimentionsSetting($name, $value, $title, $params = array()){
 
-		$this->add($name,$value,$title,self::TYPE_DIMENTIONS,$extra);
+		$params["label_block"] = true;
 
+		$this->add($name, $value, $title, self::TYPE_DIMENTIONS, $params);
+	}
+
+	/**
+	 * add tabs
+	 */
+	public function addTabs($name, $items, $value, $params = array()){
+
+		$params["items"] = $items;
+		$params["label_block"] = true;
+
+		$this->add($name, $value, self::PARAM_NOTEXT, self::TYPE_TABS, $params);
+	}
+
+	/**
+	 * add tab
+	 */
+	public function addTabIfNeeded($name){
+
+		// check if the name is empty - reset the tabs
+		if(empty($name) === true){
+			$this->currentTabs = null;
+
+			return null;
+		}
+
+		// initialize the tabs
+		$tabs = $this->currentTabs;
+
+		if(empty($tabs) === true){
+			$tabs = array(
+				"name" => "tabs_" . UniteFunctionsUC::getRandomString(5),
+				"items" => array(),
+			);
+		}
+
+		// add/update the tab
+		$value = UniteFunctionsUC::getVal($tabs["items"], $name);
+
+		if(empty($value) === true){
+			$value = "tab_" . UniteFunctionsUC::getRandomString(5);
+
+			$tabs["items"][$name] = $value;
+
+			try{
+				$this->updateSettingItems($tabs["name"], $tabs["items"]);
+			}catch(Exception $exception){
+				$this->addTabs($tabs["name"], $tabs["items"], $value);
+			}
+		}
+
+		$this->currentTabs = $tabs;
+
+		return array(
+			"name" => $tabs["name"],
+			"value" => $value,
+		);
 	}
 
 
@@ -724,9 +792,10 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 
 			break;
 			case "currency_api":
-
 				UniteCreatorAPIIntegrations::getInstance()->addServiceSettingsFields($this, UniteCreatorAPIIntegrations::TYPE_CURRENCY_EXCHANGE, $name, $condition);
-
+			break;
+			case "weather_api":
+				UniteCreatorAPIIntegrations::getInstance()->addServiceSettingsFields($this, UniteCreatorAPIIntegrations::TYPE_WEATHER_FORECAST, $name, $condition);
 			break;
 			default:
 				UniteFunctionsUC::throwError("Add special param error: wrong attribute type: $attributeType, please check that the plugin version is up to date");
@@ -813,12 +882,12 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 
 	private function a__________CONDITIONS_________(){}
 
-	
+
 	/**
 	 * add controls
 	 */
 	private function addByCreatorParam_handleConditions($param, $isForSap = false){
-		
+
 		$enableCondition = UniteFunctionsUC::getVal($param, "enable_condition");
 
 		$enableCondition = UniteFunctionsUC::strToBool($enableCondition);
@@ -843,20 +912,20 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 		$action = "show";
 		if($operator == "not_equal")
 			$action = "hide";
-		
+
 		$this->addControl($attribute, $name, $action, $value, $isForSap);
-		
+
 		if(empty($attribute2))
 			return(false);
 
 		$action = "show";
 		if($operator2 == "not_equal")
 			$action = "hide";
-		
-			
+
+
 		$this->addControl($attribute2, $name, $action, $value2, $isForSap);
 	}
-	
+
     /**
      * add control by elementor condition
      */
@@ -869,16 +938,16 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
     		UniteFunctionsUC::throwError("The elementor conditions should be array");
 
     	foreach($arrConditions as $nameParent=>$value){
-			
+
     		$type = "show";
-    		
-			$lastCharacter = substr($nameParent, -1);    		
-    		
+
+			$lastCharacter = substr($nameParent, -1);
+
 			if($lastCharacter == "!"){
 				$type = "hide";
 				$nameParent = substr($nameParent, 0, -1);	//cut last character
 			}
-			
+
     		$this->addControl($nameParent, $nameChild, $type, $value);
     	}
 
@@ -900,23 +969,21 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 
 			if(empty($elementorCondition))
 				continue;
-			
+
 			$name = UniteFunctionsUC::getVal($setting, "name");
 
 			$this->addControl_byElementorConditions($name, $elementorCondition);
 		}
 
 	}
-	
-	
+
+
 	/**
 	 * Test addon settings - inside addon use and gutenberg.
 	 * Not for elementor
 	 */
 	private function a__________TEST_ADDON_SETTINGS_________(){}
 
-	
-	
 	/**
 	 * check and add images sizes chooser
 	 */
@@ -971,8 +1038,8 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 
 		//add ready setting if exists
 		$arrReadySetting = UniteFunctionsUC::getVal($param, "uc_setting");
-		if(!empty($arrReadySetting)){
 
+		if(!empty($arrReadySetting)){
 			$classAdd = UniteFunctionsUC::getVal($arrReadySetting, UniteSettingsUC::PARAM_CLASSADD);
 
 			$arrReadySetting[UniteSettingsUC::PARAM_CLASSADD] = $classAdd;
@@ -982,36 +1049,32 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 
 			$this->addSettingByArray($arrReadySetting);
 
-			return(false);
+			return;
 		}
 
+		$defaultValue = UniteFunctionsUC::getVal($param, "default_value");
+		$value = UniteFunctionsUC::getVal($param, "value", $defaultValue);
 		$type = UniteFunctionsUC::getVal($param, "type");
 		$title = UniteFunctionsUC::getVal($param, "title");
 		$name = UniteFunctionsUC::getVal($param, "name");
 		$description = UniteFunctionsUC::getVal($param, "description");
 		$placeholder = UniteFunctionsUC::getVal($param, "placeholder");
+		$tabName = UniteFunctionsUC::getVal($param, "tabname");
 		$labelBlock = UniteFunctionsUC::getVal($param, "label_block");
-
-		$alwaysLabelBlock = array(
-			UniteCreatorDialogParam::PARAM_BORDER_DIMENTIONS,
-			UniteCreatorDialogParam::PARAM_MARGINS,
-			UniteCreatorDialogParam::PARAM_PADDING,
-			UniteCreatorDialogParam::PARAM_TEXTAREA,
-			UniteCreatorDialogParam::PARAM_MULTIPLE_SELECT,
-		);
-
-		if (in_array($type, $alwaysLabelBlock))
-			$labelBlock = true;
-
-		$defaultValue = UniteFunctionsUC::getVal($param, "default_value");
-		$value = UniteFunctionsUC::getVal($param, "value", $defaultValue);
-
+		$labelBlock = UniteFunctionsUC::strToBool($labelBlock);
+		$isResponsive = UniteFunctionsUC::getVal($param, "is_responsive");
+		$isResponsive = UniteFunctionsUC::strToBool($isResponsive);
 		$unit = UniteFunctionsUC::getVal($param, "unit");
 
 		if($unit == "other")
 			$unit = UniteFunctionsUC::getVal($param, "unit_custom");
 
-		$extra = array();
+		$extra = array(
+			"origtype" => $type,
+			"label_block" => $labelBlock,
+			"is_responsive" => $isResponsive,
+			"responsive_id" => $name,
+		);
 
 		if(!empty($description))
 			$extra["description"] = $description;
@@ -1022,20 +1085,21 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 		if(!empty($unit))
 			$extra["unit"] = $unit;
 
-		$extra["origtype"] = $type;
-		$extra["label_block"] = $labelBlock;
+		$tab = $this->addTabIfNeeded($tabName);
+
+		if(!empty($tab)){
+			$extra["tabs_id"] = $tab["name"];
+			$extra["tabs_value"] = $tab["value"];
+		}
 
 		foreach($this->arrAddAttributes as $attributeName){
-
 			$attributeValue = UniteFunctionsUC::getVal($param, $attributeName);
+
 			if(!empty($attributeValue))
 				$extra[$attributeName] = $attributeValue;
 		}
 
-
-
 		$isMultipleSettingType = self::isMultipleUCSettingType($type);
-
 		$isUpdateValue = true;
 
 		if($isMultipleSettingType && !empty($inputValue)){
@@ -1044,10 +1108,10 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 		}
 
 		switch ($type){
-			case "uc_editor":
+			case UniteCreatorDialogParam::PARAM_EDITOR:
 				$this->addEditor($name, $value, $title, $extra);
 			break;
-			case "uc_textfield":
+			case UniteCreatorDialogParam::PARAM_TEXTFIELD:
 				$this->addTextBox($name, $value, $title, $extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_LINK:
@@ -1055,54 +1119,43 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 			break;
 			case UniteCreatorDialogParam::PARAM_NUMBER:
 
-				$isResponsive = UniteFunctionsUC::getVal($param, "is_responsive");
-				$isResponsive = UniteFunctionsUC::strToBool($isResponsive);
-
-				$extra["is_responsive"] = $isResponsive;
-
-				if($isResponsive == true)
-					$extra["responsive_type"] = "desktop";
-
-				$extra["responsive_name"] = $name;
-
 				$extra["class"] = UniteCreatorSettingsOutput::INPUT_CLASS_NUMBER;
+				$extra["responsive_type"] = "desktop";
+
 				$this->addTextBox($name, $value, $title, $extra);
 
-				if($isResponsive == true){
-
+				if($isResponsive === true){
 					$valueTablet = UniteFunctionsUC::getVal($param, "default_value_tablet");
-					$valueMobile = UniteFunctionsUC::getVal($param, "default_value_mobile");
 
 					$extra["responsive_type"] = "tablet";
 
-					$this->addTextBox($name."_tablet", $valueTablet, $title." - Tablet", $extra);
+					$this->addTextBox($name . "_tablet", $valueTablet, $title, $extra);
+
+					$valueMobile = UniteFunctionsUC::getVal($param, "default_value_mobile");
 
 					$extra["responsive_type"] = "mobile";
 
-					$this->addTextBox($name."_mobile", $valueMobile, $title." - Mobile", $extra);
+					$this->addTextBox($name . "_mobile", $valueMobile, $title, $extra);
 				}
 
 			break;
 			case UniteCreatorDialogParam::PARAM_RADIOBOOLEAN:
-				$arrItems = array();
-				$arrItems[$param["false_name"]] = $param["false_value"];
-				$arrItems[$param["true_name"]] = $param["true_value"];
-				$extra["special_design"] = true;
+				$extra["true_value"] = $param["true_value"];
+				$extra["false_value"] = $param["false_value"];
 
-				$this->addRadio($name, $arrItems, $title, $value, $extra);
+				$this->addRadioBoolean($name, $title, $value, $param["true_name"], $param["false_name"], $extra);
 			break;
-			case "uc_textarea":
+			case UniteCreatorDialogParam::PARAM_TEXTAREA:
 				$this->addTextArea($name, $value, $title, $extra);
 			break;
-			case "uc_checkbox":
+			case UniteCreatorDialogParam::PARAM_CHECKBOX:
 				$textNear = UniteFunctionsUC::getVal($param, "text_near");
 				$isChecked = UniteFunctionsUC::getVal($param, "is_checked");
 				$isChecked = UniteFunctionsUC::strToBool($isChecked);
 
 				$this->addCheckbox($name, $isChecked, $title, $textNear, $extra);
 			break;
-			case "uc_dropdown":
-
+			case UniteCreatorDialogParam::PARAM_DROPDOWN:
 				$options = UniteFunctionsUC::getVal($param, "options");
 
 				$this->addSelect($name, $options, $title, $value, $extra);
@@ -1123,18 +1176,15 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 
 			break;
 			case UniteCreatorDialogParam::PARAM_POST_SELECT:
-
 				$extra["post_select"] = true;
 				$extra["post_select_type"] = "post";
 
 				$this->addMultiSelect($name, array(), $title, $value, $extra);
-
 			break;
-			case "uc_colorpicker":
+			case UniteCreatorDialogParam::PARAM_COLORPICKER:
 				$this->addColorPicker($name, $value, $title, $extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_ADDONPICKER:
-
 				$extra["addontype"] = UniteFunctionsUC::getVal($param, "addon_type");
 
 				$this->addAddonPicker($name, $value, $title, $extra);
@@ -1157,11 +1207,9 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				$isUpdateValue = false;
 			break;
 			case UniteCreatorDialogParam::PARAM_ICON:
-
 				$this->addIconPicker($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_ICON_LIBRARY:
-
 				$extra["enable_svg"] = UniteFunctionsUC::getVal($param, "enable_svg");
 
 				$this->addIconPicker($name,$value,$title,$extra);
@@ -1177,17 +1225,14 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				$isUpdateValue = false;
 			break;
 			case UniteCreatorDialogParam::PARAM_HEADING:
-
 				$extra["is_heading"] = true;
 
 				$this->addStaticText($value,$name,$extra);
-
 			break;
 			case "uc_font_override":
 				//don't draw anything
 			break;
 			case UniteCreatorDialogParam::PARAM_INSTAGRAM:
-
 				$extra["max_items"] = UniteFunctionsUC::getVal($param, "max_items");
 
 				$this->addInstagramSelector($name, $value, $title, $extra);
@@ -1196,14 +1241,12 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				$this->addPostPicker($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_POSTS_LIST:
-
 				$extra["for_woocommerce_products"] = UniteFunctionsUC::getVal($param, "for_woocommerce_products");
 				$extra["default_max_posts"] = UniteFunctionsUC::getVal($param, "default_max_posts");
 
 				$this->addPostsListPicker($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_POST_TERMS:
-
 				$extra["for_woocommerce"] = UniteFunctionsUC::getVal($param, "for_woocommerce");
 				$extra["filter_type"] = UniteFunctionsUC::getVal($param, "filter_type");
 
@@ -1213,12 +1256,7 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				$this->addWooCatsPicker($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_LISTING:
-
 				$this->addListingPicker($name,$value,$title,$param);
-
-			break;
-			case UniteCreatorDialogParam::PARAM_WOO_CATS:
-				$this->addWooCatsPicker($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_USERS:
 				$this->addUsersPicker($name,$value,$title,$extra);
@@ -1227,14 +1265,12 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				$this->addTemplatePicker($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_DATASET:
-
 				//don't add any settings
 			break;
 			case UniteCreatorDialogParam::PARAM_CONTENT;
 				$this->addContentSelector($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_MENU:
-
 				$useFor = UniteFunctionsUC::getVal($param, "usefor");
 
 				if(!empty($useFor))
@@ -1242,144 +1278,185 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 
 				$this->addMenuPicker($name,$value,$title,$extra);
 			break;
-			case UniteCreatorDialogParam::PARAM_TYPOGRAPHY:
-				$this->addTypographySetting($name, $value, $title, $extra);
+			case UniteCreatorDialogParam::PARAM_BORDER:
+				$types = array_flip(array(
+					"none" => __("None", "unlimited-elements-for-elementor"),
+					"solid" => __("Solid", "unlimited-elements-for-elementor"),
+					"dashed" => __("Dashed", "unlimited-elements-for-elementor"),
+					"dotted" => __("Dotted", "unlimited-elements-for-elementor"),
+					"double" => __("Double", "unlimited-elements-for-elementor"),
+					"groove" => __("Groove", "unlimited-elements-for-elementor"),
+					"ridge" => __("Ridge", "unlimited-elements-for-elementor"),
+					"inset" => __("Inset", "unlimited-elements-for-elementor"),
+					"outset" => __("Outset", "unlimited-elements-for-elementor"),
+				));
+
+				$selector = UniteFunctionsUC::getVal($param, "selector");
+
+				$typeName = $name . "_type";
+				$typeTitle = sprintf(__("%s Type", "unlimited-elements-for-elementor"), $title);
+				$typeDefault = UniteFunctionsUC::getVal($param, "border_type");
+				$typeCondition = array($typeName . "!" => "none");
+
+				$typeParams = array_merge($extra, array(
+					"selector" => $selector,
+					"selector_value" => HelperHtmlUC::getCSSSelectorValueByParam($type, "style"),
+				));
+
+				$this->addSelect($typeName, $types, $typeTitle, $typeDefault, $typeParams);
+
+				$widthTitle = sprintf(__("%s Width", "unlimited-elements-for-elementor"), $title);
+
+				$widthParams = array_merge($extra, array(
+					"elementor_condition" => $typeCondition,
+					"selector" => $selector,
+					"selector_value" => HelperHtmlUC::getCSSSelectorValueByParam($type, "width"),
+					"units" => array("px", "%", "em", "rem"),
+					"is_responsive" => true,
+				));
+
+				$responsive = array(
+					"desktop" => "",
+					"tablet" => "_tablet",
+					"mobile" => "_mobile",
+				);
+
+				foreach($responsive as $device => $suffix){
+					$addValue = array();
+					$addValue["top"] = UniteFunctionsUC::getVal($param, "width_{$device}_top");
+					$addValue["bottom"] = UniteFunctionsUC::getVal($param, "width_{$device}_bottom");
+					$addValue["left"] = UniteFunctionsUC::getVal($param, "width_{$device}_left");
+					$addValue["right"] = UniteFunctionsUC::getVal($param, "width_{$device}_right");
+					$addValue["unit"] = UniteFunctionsUC::getVal($param, "width_{$device}_unit");
+					$addValue["is_linked"] = UniteFunctionsUC::getVal($param, "width_{$device}_is_linked", true);
+
+					$widthParams["responsive_type"] = $device;
+
+					$this->addDimentionsSetting("{$name}_width{$suffix}", $addValue, $widthTitle, $widthParams);
+				}
+
+				$colorTitle = sprintf(__("%s Color", "unlimited-elements-for-elementor"), $title);
+				$colorDefault = UniteFunctionsUC::getVal($param, "border_color");
+
+				$colorParams = array_merge($extra, array(
+					"elementor_condition" => $typeCondition,
+					"selector" => $selector,
+					"selector_value" => HelperHtmlUC::getCSSSelectorValueByParam($type, "color"),
+				));
+
+				$this->addColorPicker($name . "_color", $colorDefault, $colorTitle, $colorParams);
 			break;
 			case UniteCreatorDialogParam::PARAM_PADDING:
 			case UniteCreatorDialogParam::PARAM_MARGINS:
 			case UniteCreatorDialogParam::PARAM_BORDER_DIMENTIONS:
+				$extra["selector_value"] = HelperHtmlUC::getCSSSelectorValueByParam($type);
 
-				$prefix = "desktop_";
+				$withoutUnits = UniteFunctionsUC::getVal($param, "no_units");
+				$withoutUnits = UniteFunctionsUC::strToBool($withoutUnits);
 
-				$addValue = array();
-				$addValue["top"] = UniteFunctionsUC::getVal($param, "{$prefix}top");
-				$addValue["bottom"] = UniteFunctionsUC::getVal($param, "{$prefix}bottom");
-				$addValue["left"] = UniteFunctionsUC::getVal($param, "{$prefix}left");
-				$addValue["right"] = UniteFunctionsUC::getVal($param, "{$prefix}right");
-				$addValue["units"] = UniteFunctionsUC::getVal($param, "units");
-
-				$isResponsive = UniteFunctionsUC::getVal($param, "is_responsive");
-				$isResponsive = UniteFunctionsUC::strToBool($isResponsive);
-
-				if($isResponsive == true){
-
-					$addValue["is_responsive"] = true;
-
-					$prefix = "tablet_";
-
-					$addValue[$prefix."top"] = UniteFunctionsUC::getVal($param, "{$prefix}top");
-					$addValue[$prefix."bottom"] = UniteFunctionsUC::getVal($param, "{$prefix}bottom");
-					$addValue[$prefix."left"] = UniteFunctionsUC::getVal($param, "{$prefix}left");
-					$addValue[$prefix."right"] = UniteFunctionsUC::getVal($param, "{$prefix}right");
-					$addValue[$prefix."units"] = UniteFunctionsUC::getVal($param, "units");
-
-					$prefix = "mobile_";
-					$addValue[$prefix."top"] = UniteFunctionsUC::getVal($param, "{$prefix}top");
-					$addValue[$prefix."bottom"] = UniteFunctionsUC::getVal($param, "{$prefix}bottom");
-					$addValue[$prefix."left"] = UniteFunctionsUC::getVal($param, "{$prefix}left");
-					$addValue[$prefix."right"] = UniteFunctionsUC::getVal($param, "{$prefix}right");
-					$addValue[$prefix."units"] = UniteFunctionsUC::getVal($param, "units");
+				if($withoutUnits === false){
+					$extra["units"] = array("px", "%", "em", "rem");
+					$extra["units_selected"] = reset($extra["units"]);
 				}
 
-				$this->addDimentionsSetting($name, $addValue, $title, $extra);
+				$responsive = array("desktop" => "");
 
+				if($isResponsive === true){
+					$responsive["tablet"] = "_tablet";
+					$responsive["mobile"] = "_mobile";
+				}
+
+			foreach($responsive as $device => $suffix){
+					$addValue = array();
+					$addValue["top"] = UniteFunctionsUC::getVal($param, "{$device}_top");
+					$addValue["bottom"] = UniteFunctionsUC::getVal($param, "{$device}_bottom");
+					$addValue["left"] = UniteFunctionsUC::getVal($param, "{$device}_left");
+					$addValue["right"] = UniteFunctionsUC::getVal($param, "{$device}_right");
+					$addValue["unit"] = UniteFunctionsUC::getVal($param, "{$device}_unit");
+					$addValue["is_linked"] = UniteFunctionsUC::getVal($param, "{$device}_is_linked", true);
+
+					$extra["responsive_type"] = $device;
+
+					$this->addDimentionsSetting($name . $suffix, $addValue, $title, $extra);
+				}
 			break;
 			case UniteCreatorDialogParam::PARAM_SLIDER:
-
 				$extra["min"] = UniteFunctionsUC::getVal($param, "min");
 				$extra["max"] = UniteFunctionsUC::getVal($param, "max");
 				$extra["step"] = UniteFunctionsUC::getVal($param, "step");
-				$extra["unit"] = UniteFunctionsUC::getVal($param, "units");
+				$extra["units"] = UniteFunctionsUC::getVal($param, "units");
+				$extra["units"] = str_replace("percent", "%", $extra["units"]);
+				$extra["units"] = explode("_", $extra["units"]);
 
-				$isResponsive = UniteFunctionsUC::getVal($param, "is_responsive");
-				$isResponsive = UniteFunctionsUC::strToBool($isResponsive);
+				$responsive = array("desktop" => "");
 
-				$extra["is_responsive"] = $isResponsive;
-
-				if($isResponsive == true)
-					$extra["responsive_type"] = "desktop";
-
-
-				$this->addRangeSlider($name, $value, $title, $extra);
-
-				if($isResponsive == true){
-
-					$valueTablet = UniteFunctionsUC::getVal($param, "default_value_tablet");
-					$valueMobile = UniteFunctionsUC::getVal($param, "default_value_mobile");
-
-					$extra["responsive_type"] = "tablet";
-
-					$this->addRangeSlider($name."_tablet", $valueTablet, $title." - Tablet", $extra);
-
-					$extra["responsive_type"] = "mobile";
-
-					$this->addRangeSlider($name."_mobile", $valueMobile, $title." - Mobile", $extra);
+				if($isResponsive === true){
+					$responsive["tablet"] = "_tablet";
+					$responsive["mobile"] = "_mobile";
 				}
 
+				foreach($responsive as $device => $suffix){
+					$value = UniteFunctionsUC::getVal($param, "default_value{$suffix}");
+
+					$extra["responsive_type"] = $device;
+
+					$this->addRangeSlider($name . $suffix, $value, $title, $extra);
+				}
 			break;
-			case UniteCreatorDialogParam::PARAM_BACKGROUND:
-
-				$this->addBackgroundSettings($name,$value,$title,$param);
-
-			break;
-			case UniteCreatorDialogParam::PARAM_BORDER:
-
-				$this->addVisibleInElementorOnlySetting("Border");
-
+			case UniteCreatorDialogParam::PARAM_TYPOGRAPHY:
+				$this->addTypographySetting($name, $value, $title, $extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_TEXTSHADOW:
-
-				$this->addVisibleInElementorOnlySetting("Text Shadow");
-
+				$this->addTextShadowSetting($name, $value, $title, $extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_BOXSHADOW:
-
-				$this->addVisibleInElementorOnlySetting("Box Shadow");
-
+				$this->addBoxShadowSetting($name, $value, $title, $extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_CSS_FILTERS:
-
-				$this->addVisibleInElementorOnlySetting("Css Filters");
-
+				$this->addCssFiltersSetting($name, $value, $title, $extra);
+			break;
+			case UniteCreatorDialogParam::PARAM_BACKGROUND:
+				$this->addBackgroundSettings($name, $value, $title, $param, $extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_HOVER_ANIMATIONS:
+				$animations = HelperProviderCoreUC_EL::getHoverAnimations();
+				$prefix = "unite-animation-";
+				$items = array("" => __("None", "unlimited-elements-for-elementor"));
 
-				$this->addVisibleInElementorOnlySetting("Hover Animations");
+				foreach($animations as $key => $value){
+					$items[$prefix . $key] = $value;
+				}
 
+				$value = UniteFunctionsUC::getVal($param, "default_value");
+				$value = str_replace("elementor-animation-", $prefix, $value);
+
+				$this->addSelect($name, array_flip($items), $title, $value, $extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_SPECIAL:
-
 				$this->addSpecialParam($name, $param);
-
 			break;
 			case UniteCreatorDialogParam::PARAM_DATETIME:
-
 				$extra["placeholder"] = "YYYY-mm-dd HH:ii";
 
 				$this->addTextBox($name, $value, $title, $extra);
-
 			break;
 			default:
+				$isAdded = $this->addSettingsProvider($type, $name, $value, $title, $extra);
 
-				$isAdded = $this->addSettingsProvider($type,$name,$value,$title,$extra);
 				if($isAdded == false)
 					UniteFunctionsUC::throwError("initByCreatorParams error: Wrong setting type: $type");
-
 			break;
 		}
 
 		$this->addByCreatorParam_handleConditions($param);
 
 		//set setting value
-		if($inputValue !== null && $isUpdateValue == true){
-
+		if($inputValue !== null && $isUpdateValue === true)
 			$this->updateSettingValue($name, $inputValue);
-		}
 
 	}
 
-	
-	
+
 
     /**
      * sort params by categories
@@ -1480,178 +1557,147 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 	 */
 	private function addAdvancedSection(){
 
+		$this->addSap(esc_html__("Advanced", "unlimited-elements-for-elementor"), "advanced");
+
 		$params = array();
+		$params["description"] = __("Show widget data for debugging purposes. Please turn off this option when you releasing the widget.", "unlimited-elements-for-elementor");
 
-		$this->addSap(__("Advanced", "unlimited-elements-for-elementor"), $params);
-
-		$params = array('description'=>__('Show widget data for debugging purposes. Please turn off this option when you releasing the widget', 'unlimited-elements-for-elementor'));
-
-		$this->addRadioBoolean("show_widget_debug_data", __("Show Widget Data For Debug","unlimited-elements-for-elementor"), false, "Yes","No", $params);
+		$this->addRadioBoolean("show_widget_debug_data", __("Show Widget Data For Debug", "unlimited-elements-for-elementor"), false, "Yes", "No", $params);
 
 		$isItemsEnabled = $this->currentAddon->isHasItems();
-
 		$hasPostsList = $this->currentAddon->isParamTypeExists(UniteCreatorDialogParam::PARAM_POSTS_LIST);
 
 		//--------- debug type options ---------
-
-
 		$debugTypeOptions = array();
-		$debugTypeOptions["default"] = __( 'Default', 'unlimited-elements-for-elementor' );
+		$debugTypeOptions["default"] = __('Default', 'unlimited-elements-for-elementor');
 
 		if($hasPostsList == true)
 			$isItemsEnabled = true;
 
 		if($isItemsEnabled == true)
-			$debugTypeOptions["items_only"] = __( 'Items Only', 'unlimited-elements-for-elementor' );
+			$debugTypeOptions["items_only"] = __('Items Only', 'unlimited-elements-for-elementor');
 
 		if($hasPostsList == true){
-			$debugTypeOptions["post_titles"] = __( 'Posts Titles', 'unlimited-elements-for-elementor' );
-			$debugTypeOptions["post_meta"] = __( 'Posts Titles and Meta', 'unlimited-elements-for-elementor' );
+			$debugTypeOptions["post_titles"] = __('Posts Titles', 'unlimited-elements-for-elementor');
+			$debugTypeOptions["post_meta"] = __('Posts Titles and Meta', 'unlimited-elements-for-elementor');
 		}
 
-		$debugTypeOptions["current_post_data"] = __( 'Current Post Data', 'unlimited-elements-for-elementor' );
-		$debugTypeOptions["settings_values"] = __( 'Show Settings Values', 'unlimited-elements-for-elementor' );
+		$debugTypeOptions["current_post_data"] = __('Current Post Data', 'unlimited-elements-for-elementor');
+		$debugTypeOptions["settings_values"] = __('Show Settings Values', 'unlimited-elements-for-elementor');
 
 		$hasDebugType = (count($debugTypeOptions) > 1);
 
 		if($hasDebugType == true){
-
 			$params = array();
 
 			$debugTypeOptions = array_flip($debugTypeOptions);
 
 			$this->addSelect("widget_debug_data_type", $debugTypeOptions,
-						     __("Debug Data Type","unlimited-elements-for-elementor"), "default", $params);
-
+				__("Debug Data Type", "unlimited-elements-for-elementor"), "default", $params);
 		}
 
 		$this->addControl("show_widget_debug_data", "widget_debug_data_type", "show", "true");
 
-
 		$this->addEditWidgetButton();
-
-
 	}
 
-
 	/**
-	 * add settings by creator params - works for single widget only
-	 * not for elementor
+	 * add settings by creator params - works for single widget only (not for elementor)
 	 */
 	public function initByCreatorParams($arrParams, $arrCats = array()){
-		
-		if(empty($arrCats)){
 
-			foreach($arrParams as $param)
+		if(empty($arrCats) === true){
+			foreach($arrParams as $param){
 				$this->addByCreatorParam($param);
+			}
 
-			return(false);
+			return;
 		}
 
-		//put params with cats
-
+		// put params with cats
 		$arrParamsWithCats = $this->sortParamsByCats($arrCats, $arrParams);
 
-		if(empty($arrParamsWithCats))
-			return(false);
+		if(empty($arrParamsWithCats) === true)
+			return;
 
-         $hasPostsList = false;
-	     $postListParam = null;
+		$hasPostsList = false;
+		$postListParam = null;
 
-	     $hasListing = false;
-         $listingParam = null;
+//		$hasListing = false;
+//		$listingParam = null;
 
 		foreach($arrParamsWithCats as $catID => $arrCat){
-
 			$title = UniteFunctionsUC::getVal($arrCat, "title");
 			$tab = UniteFunctionsUC::getVal($arrCat, "tab");
-
 			$arrParams = UniteFunctionsUC::getVal($arrCat, "params");
-			
+
 			$sapParams = $arrCat;
+
 			unset($sapParams["params"]);
-			
+
 			$this->addSap($title, $catID, $tab);
-			
-			//handle sap conditions
-			
+
+			// handle sap conditions
 			$sapParams["name"] = $catID;
+
 			$this->addByCreatorParam_handleConditions($sapParams, true);
-			
-			
+
 			foreach($arrParams as $param){
+				$type = UniteFunctionsUC::getVal($param, "type");
 
-	          	$type = UniteFunctionsUC::getVal($param, "type");
+				if($type === UniteCreatorDialogParam::PARAM_POSTS_LIST){
+					$hasPostsList = true;
+					$postListParam = $param;
 
-          		if($type === UniteCreatorDialogParam::PARAM_POSTS_LIST){
-          			$hasPostsList = true;
-          			$postListParam = $param;
+//					$showImageSizes = UniteFunctionsUC::getVal($postListParam, "show_image_sizes");
+//					$showImageSizes = UniteFunctionsUC::strToBool($showImageSizes);
+//
+//					if($showImageSizes == true)
+//					$this->addImageSizesParam($postListParam);
 
-          			$showImageSizes = UniteFunctionsUC::getVal($postListParam, "show_image_sizes");
-          			$showImageSizes = UniteFunctionsUC::strToBool($showImageSizes);
+					continue;
+				}
 
-          			//if($showImageSizes == true)
-          				//$this->addImageSizesParam($postListParam);
-
-          			continue;
-          		}
-
-          		if($type == UniteCreatorDialogParam::PARAM_LISTING){
-
-          			$useFor = UniteFunctionsUC::getVal($param, "use_for");
-          			switch($useFor){
-          				case "remote":
-          				case "filter":
-          				break;
-          				default:
-		          			$hasListing = true;
-		          			$listingParam = $param;
-          				break;
-          			}
-          		}
-
+//				if($type == UniteCreatorDialogParam::PARAM_LISTING){
+//					$useFor = UniteFunctionsUC::getVal($param, "use_for");
+//
+//					switch($useFor){
+//						case "remote":
+//						case "filter":
+//						break;
+//						default:
+//							$hasListing = true;
+//							$listingParam = $param;
+//						break;
+//					}
+//				}
 
 				$this->addByCreatorParam($param);
+			}
+		}
 
-			} //end params iteration
-
-		} //end cats iteration
-
-
-        //add query settings section (post list) if exists
+		// add query settings section (post list) if exists
 
         if($hasPostsList == true){
 
-          	$forWooCommerce = UniteFunctionsUC::getVal($postListParam, "for_woocommerce_products");
-          	$forWooCommerce = UniteFunctionsUC::strToBool($forWooCommerce);
+			$forWooCommerce = UniteFunctionsUC::getVal($postListParam, "for_woocommerce_products");
+			$forWooCommerce = UniteFunctionsUC::strToBool($forWooCommerce);
 
           	if($forWooCommerce == true)
-          		$labelPosts = esc_html__("Products Query", "unlimited-elements-for-elementor");
+				$labelPosts = esc_html__("Products Query", "unlimited-elements-for-elementor");
 			else
-          		$labelPosts = esc_html__("Posts Query", "unlimited-elements-for-elementor");
+				$labelPosts = esc_html__("Posts Query", "unlimited-elements-for-elementor");
 
 			$this->addSap($labelPosts, "section_query");
 
 			$this->addByCreatorParam($postListParam);
+		}
 
-        }
+		$this->addAdvancedSection();
 
-        $this->addAdvancedSection();
+		//add control by elementor conditions - from post list, terms list etc.
 
-          //add control by elementor conditions - from post list, terms list etc.
-
-       $this->addControls_byElementorConditions();
-
+		$this->addControls_byElementorConditions();
 	}
-
-	/**
-	 * add text that the setting will be visible in elementor
-	 */
-	private function addVisibleInElementorOnlySetting($settingName){
-
-		$this->addStaticText("$settingName setting will be visible in elementor");
-
-	}
-
 
 }

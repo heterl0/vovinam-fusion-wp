@@ -62,11 +62,11 @@ class UniteCreatorAPIIntegrations{
 	const GOOGLE_SHEETS_FIELD_CACHE_TIME = "google_sheets:cache_time";
 	const GOOGLE_SHEETS_DEFAULT_CACHE_TIME = 10;
 
-	const WEATHER_FORECAST_FIELD_EMPTY_API_KEY = "weather_forecast:empty_api_key";
-	const WEATHER_FORECAST_FIELD_COUNTRY = "weather_forecast:country";
-	const WEATHER_FORECAST_FIELD_CITY = "weather_forecast:city";
-	const WEATHER_FORECAST_FIELD_UNITS = "weather_forecast:units";
-	const WEATHER_FORECAST_FIELD_CACHE_TIME = "weather_forecast:cache_time";
+	const WEATHER_FORECAST_FIELD_EMPTY_API_KEY = "weather_forecast_empty_api_key";
+	const WEATHER_FORECAST_FIELD_COUNTRY = "weather_forecast_country";
+	const WEATHER_FORECAST_FIELD_CITY = "weather_forecast_city";
+	const WEATHER_FORECAST_FIELD_UNITS = "weather_forecast_units";
+	const WEATHER_FORECAST_FIELD_CACHE_TIME = "weather_forecast_cache_time";
 	const WEATHER_FORECAST_DEFAULT_CACHE_TIME = 60;
 	const WEATHER_FORECAST_UNITS_METRIC = "metric";
 	const WEATHER_FORECAST_UNITS_IMPERIAL = "imperial";
@@ -179,7 +179,7 @@ class UniteCreatorAPIIntegrations{
 				$data = $this->getYoutubePlaylistData();
 			break;
 			default:
-				UniteFunctionsUC::throwError(__FUNCTION__ . " error - API type \"$type\" is not implemented");
+				UniteFunctionsUC::throwError(__FUNCTION__ . " Error: API type \"$type\" is not implemented");
 		}
 
 		return $data;
@@ -195,6 +195,9 @@ class UniteCreatorAPIIntegrations{
 		switch($type){
 			case self::TYPE_CURRENCY_EXCHANGE:
 				$data = UniteFunctionsUC::getVal($data, "rates_chosen");
+			break;
+			case self::TYPE_WEATHER_FORECAST:
+				$data = UniteFunctionsUC::getVal($data, "daily");
 			break;
 		}
 
@@ -284,7 +287,7 @@ class UniteCreatorAPIIntegrations{
 					$settingsManager->addSelect($paramName, array_flip($field["options"]), $field["text"], $paramDefault, $params);
 				break;
 				default:
-					UniteFunctionsUC::throwError(__FUNCTION__ . " error - Field type \"{$field["type"]}\" is not implemented");
+					UniteFunctionsUC::throwError(__FUNCTION__ . " Error: Field type \"{$field["type"]}\" is not implemented");
 			}
 		}
 
@@ -446,16 +449,6 @@ class UniteCreatorAPIIntegrations{
 	private function getExchangeRateApiKey(){
 
 		$key = $this->getRequiredParam(self::SETTINGS_EXCHANGE_RATE_API_KEY, "Exchange Rate API key");
-
-		return $key;
-	}
-
-	/**
-	 * get open weather api key
-	 */
-	private function getOpenWeatherApiKey(){
-
-		$key = $this->getRequiredParam(self::SETTINGS_OPEN_WEATHER_API_KEY, "OpenWeather API key");
 
 		return $key;
 	}
@@ -626,51 +619,6 @@ class UniteCreatorAPIIntegrations{
 	}
 
 	/**
-	 * get weather forecast settings fields
-	 */
-	private function getWeatherForecastSettingsFields(){
-
-		$fields = array();
-
-		$key = HelperProviderCoreUC_EL::getGeneralSetting(self::SETTINGS_OPEN_WEATHER_API_KEY);
-
-		$fields = $this->addEmptyApiKeyField($fields, $key, self::WEATHER_FORECAST_FIELD_EMPTY_API_KEY, "OpenWeather API");
-
-		$fields = array_merge($fields, array(
-			array(
-				"id" => self::WEATHER_FORECAST_FIELD_COUNTRY,
-				"type" => UniteCreatorDialogParam::PARAM_TEXTFIELD,
-				"text" => __("Country Code", "unlimited-elements-for-elementor"),
-				"desc" => sprintf(__("Specify the two-letter <a href='%s' target='_blank'>country code</a>.", "unlimited-elements-for-elementor"), "https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes"),
-			),
-			array(
-				"id" => self::WEATHER_FORECAST_FIELD_CITY,
-				"type" => UniteCreatorDialogParam::PARAM_TEXTFIELD,
-				"text" => __("City Name", "unlimited-elements-for-elementor"),
-			),
-			array(
-				"id" => self::WEATHER_FORECAST_FIELD_UNITS,
-				"type" => UniteCreatorDialogParam::PARAM_DROPDOWN,
-				"text" => __("Units", "unlimited-elements-for-elementor"),
-				"options" => array(
-					self::WEATHER_FORECAST_UNITS_METRIC => __("Metric", "unlimited-elements-for-elementor"),
-					self::WEATHER_FORECAST_UNITS_IMPERIAL => __("Imperial", "unlimited-elements-for-elementor"),
-				),
-				"default" => self::WEATHER_FORECAST_UNITS_METRIC,
-			),
-			array(
-				"id" => self::WEATHER_FORECAST_FIELD_CACHE_TIME,
-				"type" => UniteCreatorDialogParam::PARAM_TEXTFIELD,
-				"text" => __("Cache Time", "unlimited-elements-for-elementor"),
-				"desc" => sprintf(__("Optional. You can specify the cache time of results in minutes. The default value is %d minutes.", "unlimited-elements-for-elementor"), self::CURRENCY_EXCHANGE_DEFAULT_CACHE_TIME),
-				"default" => self::WEATHER_FORECAST_DEFAULT_CACHE_TIME,
-			),
-		));
-
-		return $fields;
-	}
-
-	/**
 	 * get youtube playlist settings fields
 	 */
 	private function getYoutubePlaylistSettingsFields(){
@@ -752,14 +700,18 @@ class UniteCreatorAPIIntegrations{
 
 		foreach($rates as $rate){
 			$code = $rate->getCode();
+			$symbol = $rate->getSymbol();
+			$formattedRate = $rate->getRate($precision);
 
 			$data[$code] = array(
 				"id" => $rate->getId(),
 				"code" => $code,
 				"name" => $rate->getName(),
-				"symbol" => $rate->getSymbol(),
+				"symbol" => $symbol,
 				"flag" => $rate->getFlagUrl(),
-				"rate" => $rate->getRate($precision),
+				"rate" => $formattedRate,
+				"value_before" => "$symbol$formattedRate",
+				"value_after" => "$formattedRate$symbol",
 			);
 		}
 
@@ -997,12 +949,70 @@ class UniteCreatorAPIIntegrations{
 		return $data;
 	}
 
+	private function _________WEATHER_________(){
+	}
+
+	/**
+	 * get open weather api key
+	 */
+	private function getOpenWeatherApiKey(){
+
+		$key = $this->getRequiredParam(self::SETTINGS_OPEN_WEATHER_API_KEY, "OpenWeather API key");
+
+		return $key;
+	}
+
+	/**
+	 * get weather forecast settings fields
+	 */
+	private function getWeatherForecastSettingsFields(){
+
+		$fields = array();
+
+		$key = HelperProviderCoreUC_EL::getGeneralSetting(self::SETTINGS_OPEN_WEATHER_API_KEY);
+
+		$fields = $this->addEmptyApiKeyField($fields, $key, self::WEATHER_FORECAST_FIELD_EMPTY_API_KEY, "OpenWeather API");
+
+		$fields = array_merge($fields, array(
+			array(
+				"id" => self::WEATHER_FORECAST_FIELD_COUNTRY,
+				"type" => UniteCreatorDialogParam::PARAM_TEXTFIELD,
+				"text" => __("Country Code", "unlimited-elements-for-elementor"),
+				"desc" => sprintf(__("Specify the two-letter <a href='%s' target='_blank'>country code</a>.", "unlimited-elements-for-elementor"), "https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes"),
+				"default"=>"GB"
+			),
+			array(
+				"id" => self::WEATHER_FORECAST_FIELD_CITY,
+				"type" => UniteCreatorDialogParam::PARAM_TEXTFIELD,
+				"text" => __("City Name", "unlimited-elements-for-elementor"),
+				"default" => "London"
+			),
+			array(
+				"id" => self::WEATHER_FORECAST_FIELD_UNITS,
+				"type" => UniteCreatorDialogParam::PARAM_DROPDOWN,
+				"text" => __("Units", "unlimited-elements-for-elementor"),
+				"options" => array(
+					self::WEATHER_FORECAST_UNITS_METRIC => __("Metric", "unlimited-elements-for-elementor"),
+					self::WEATHER_FORECAST_UNITS_IMPERIAL => __("Imperial", "unlimited-elements-for-elementor"),
+				),
+				"default" => self::WEATHER_FORECAST_UNITS_METRIC,
+			),
+			array(
+				"id" => self::WEATHER_FORECAST_FIELD_CACHE_TIME,
+				"type" => UniteCreatorDialogParam::PARAM_TEXTFIELD,
+				"text" => __("Cache Time", "unlimited-elements-for-elementor"),
+				"desc" => sprintf(__("Optional. You can specify the cache time of results in minutes. The default value is %d minutes.", "unlimited-elements-for-elementor"), self::CURRENCY_EXCHANGE_DEFAULT_CACHE_TIME),
+				"default" => self::WEATHER_FORECAST_DEFAULT_CACHE_TIME,
+			),
+		));
+
+		return $fields;
+	}
+
 	/**
 	 * get weather forecast data
 	 */
 	private function getWeatherForecastData(){
-
-		$data = array();
 
 		$country = $this->getRequiredParam(self::WEATHER_FORECAST_FIELD_COUNTRY, "Country");
 		$city = $this->getRequiredParam(self::WEATHER_FORECAST_FIELD_CITY, "City");
@@ -1012,35 +1022,139 @@ class UniteCreatorAPIIntegrations{
 		$weatherService = new UEOpenWeatherAPIClient($this->getOpenWeatherApiKey());
 		$weatherService->setCacheTime($cacheTime);
 
-		$forecasts = $weatherService->getDailyForecast($country, $city, $units);
+		$forecasts = $weatherService->getForecasts($country, $city, $units);
 
+		$currentForecast = UniteFunctionsUC::getVal($forecasts, "current");
+		$hourlyForecasts = UniteFunctionsUC::getVal($forecasts, "hourly");
+		$dailyForecasts = UniteFunctionsUC::getVal($forecasts, "daily");
+
+		$data = array(
+			"current" => $this->getWeatherForecastCurrentItem($currentForecast),
+			"hourly" => $this->getWeatherForecastHourlyItems($hourlyForecasts),
+			"daily" => $this->getWeatherForecastDailyItems($dailyForecasts),
+		);
+
+		return $data;
+	}
+
+	/**
+	 * get weather forecasts basic item
+	 */
+	private function getWeatherForecastBasicItem($forecast){
+	
+		$item = array(
+			"id" => $forecast->getId(),
+			"date" => $forecast->getDate(self::FORMAT_MYSQL_DATETIME),
+			"dow_full" => $forecast->getDate("l"),
+			"dow_short" => $forecast->getDate("D"),
+			"state" => $forecast->getState(),
+			"description" => $forecast->getDescription(),
+			"icon_name" => $forecast->getIconName(),
+			"icon_url" => $forecast->getIconUrl(),
+			"wind_speed" => $forecast->getWindSpeed(),
+			"wind_degree" => $forecast->getWindDegrees(),
+			"wind_gust" => $forecast->getWindGust(),
+			"pressure" => $forecast->getPressure(),
+			"humidity" => $forecast->getHumidity(),
+			"cloudiness" => $forecast->getCloudiness(),
+			"rain" => $forecast->getRain(),
+			"snow" => $forecast->getSnow(),
+			"uvi" => $forecast->getUvi(),
+		);
+
+		return $item;
+	}
+
+	/**
+	 * get weather forecasts sun time item
+	 */
+	private function getWeatherForecastSunTimeItem($forecast){
+
+		$item = array(
+			"sunrise" => $forecast->getSunrise(),
+			"sunset" => $forecast->getSunset(),
+		);
+
+		return $item;
+	}
+
+	/**
+	 * get weather forecasts inline temperature item
+	 */
+	private function getWeatherForecastInlineTemperatureItem($forecast){
+
+		$item = array(
+			"temp" => $forecast->getTemperature(),
+			"feels_like" => $forecast->getFeelsLike(),
+		);
+
+		return $item;
+	}
+
+	/**
+	 * get weather forecast current item
+	 */
+	private function getWeatherForecastCurrentItem($forecast){
+		
+		$item = array_merge(
+			$this->getWeatherForecastBasicItem($forecast),
+			$this->getWeatherForecastSunTimeItem($forecast),
+			$this->getWeatherForecastInlineTemperatureItem($forecast)
+		);
+
+		return $item;
+	}
+
+	/**
+	 * get weather forecasts hourly items
+	 */
+	private function getWeatherForecastHourlyItems($forecasts){
+
+		$items = array();
+		
 		foreach($forecasts as $forecast){
-			$data[] = array(
-				"id" => $forecast->getId(),
-				"date" => $forecast->getDate(self::FORMAT_DATE),
-				"description" => $forecast->getDescription(),
-				"temp_min" => $forecast->getMinTemperature(),
-				"temp_max" => $forecast->getMaxTemperature(),
-				"temp_morning" => $forecast->getMorningTemperature(),
-				"temp_day" => $forecast->getDayTemperature(),
-				"temp_evening" => $forecast->getEveningTemperature(),
-				"temp_night" => $forecast->getNightTemperature(),
-				"feels_like_morning" => $forecast->getMorningFeelsLike(),
-				"feels_like_day" => $forecast->getDayFeelsLike(),
-				"feels_like_evening" => $forecast->getEveningFeelsLike(),
-				"feels_like_night" => $forecast->getNightFeelsLike(),
-				"wind_speed" => $forecast->getWindSpeed(),
-				"wind_degree" => $forecast->getWindDegrees(),
-				"wind_gust" => $forecast->getWindGust(),
-				"pressure" => $forecast->getPressure(),
-				"humidity" => $forecast->getHumidity(),
-				"cloudiness" => $forecast->getCloudiness(),
-				"rain" => $forecast->getRain(),
-				"uvi" => $forecast->getUvi(),
+			
+			$arrHours = array(
+				"date_hours"=>$forecast->getDate("H").":00"
+			);
+			
+			$items[] = array_merge(
+				$this->getWeatherForecastBasicItem($forecast),
+				$this->getWeatherForecastInlineTemperatureItem($forecast),
+				$arrHours
 			);
 		}
 
-		return $data;
+		return $items;
+	}
+
+	/**
+	 * get weather forecasts daily items
+	 */
+	private function getWeatherForecastDailyItems($forecasts){
+
+		$items = array();
+
+		foreach($forecasts as $forecast){
+			$items[] = array_merge(
+				$this->getWeatherForecastBasicItem($forecast),
+				$this->getWeatherForecastSunTimeItem($forecast),
+				array(
+					"temp_min" => $forecast->getMinTemperature(),
+					"temp_max" => $forecast->getMaxTemperature(),
+					"temp_morning" => $forecast->getMorningTemperature(),
+					"temp_day" => $forecast->getDayTemperature(),
+					"temp_evening" => $forecast->getEveningTemperature(),
+					"temp_night" => $forecast->getNightTemperature(),
+					"feels_like_morning" => $forecast->getMorningFeelsLike(),
+					"feels_like_day" => $forecast->getDayFeelsLike(),
+					"feels_like_evening" => $forecast->getEveningFeelsLike(),
+					"feels_like_night" => $forecast->getNightFeelsLike(),
+				)
+			);
+		}
+
+		return $items;
 	}
 
 	/**

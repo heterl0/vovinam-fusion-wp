@@ -44,6 +44,14 @@ class Functions {
     return did_action($hookName);
   }
 
+  /**
+   * @param string $hookName
+   * @return int
+   */
+  public function didFilter($hookName) {
+    return did_filter($hookName);
+  }
+
   public function trailingslashit(string $url) {
     return trailingslashit($url);
   }
@@ -253,6 +261,10 @@ class Functions {
 
   public function getPost($post = null, $output = OBJECT, $filter = 'raw') {
     return get_post($post, $output, $filter);
+  }
+
+  public function wpUpdatePost($postarr = [], bool $wp_error = false, bool $fire_after_hooks = true) {
+    return wp_update_post($postarr, $wp_error, $fire_after_hooks);
   }
 
   public function hasCategory($category = '', $post = null): bool {
@@ -939,5 +951,21 @@ class Functions {
 
   public function getQueriedObjectId() {
     return get_queried_object_id();
+  }
+
+  /**
+   * @param string $string
+   * @param bool $removeBreaks
+   */
+  public function wpStripAllTags($string, $removeBreaks = false): string {
+    return wp_strip_all_tags($string, $removeBreaks);
+  }
+
+  public function getTheContent($more_link_text = null, $strip_teaser = false, $post = null) {
+    return get_the_content($more_link_text, $strip_teaser, $post);
+  }
+
+  public function getTaxonomy($taxonomy) {
+    return get_taxonomy($taxonomy);
   }
 }

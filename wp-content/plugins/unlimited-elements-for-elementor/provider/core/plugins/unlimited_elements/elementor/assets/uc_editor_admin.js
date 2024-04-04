@@ -7,7 +7,7 @@ function UniteCreatorElementorEditorAdmin(){
 	var g_objSettingsPanel;
 	var g_objAddonParams, g_objAddonParamsItems, g_lastAddonName;
 	var g_numRepeaterItems = 0;
-	var g_windowFront, g_searchDataID, g_searchData, g_frontAPI; 
+	var g_windowFront, g_searchDataID, g_searchData, g_frontAPI, g_objBody; 
 	var g_temp = {
 		startTime:0
 	};
@@ -470,7 +470,7 @@ function UniteCreatorElementorEditorAdmin(){
 				
 		var type = objSelect.data("datatype");
 		
-		if(type == "terms")
+		if(type == "terms" || type == "users")
 			return(false);
 		
 		var objWrapper = objSelect.parents(".elementor-control-input-wrapper");
@@ -510,21 +510,6 @@ function UniteCreatorElementorEditorAdmin(){
 		objWrapper.append(htmlButton);
 		
 		
-		/*
-		var dataType = getVal(data, "dataType");
-		var isSingle = getVal(data,"issingle");
-		
-		trace(dataType);
-		trace(isSingle);
-		
-		if(dataType == "terms")
-			return(false);
-		
-		if(isSingle == false)
-			return(false);
-		
-		trace("check init data");
-		*/
 	}
 	
 	
@@ -546,10 +531,17 @@ function UniteCreatorElementorEditorAdmin(){
 		if(type == "elementor_template")
 			postType = "elementor_template";
 		
+		
 		//get terms
 		var action = "get_posts_list_forselect";
+		
 		if(type == "terms"){
 			action = "get_terms_list_forselect";
+		}
+		
+		if(type == "users"){
+			action = "get_users_list_forselect";
+			
 		}
 		
 		var taxonomyName = objSelect.data("taxonomyname");
@@ -654,8 +646,12 @@ function UniteCreatorElementorEditorAdmin(){
 		};
 		
 		var action = "get_select2_post_titles";
+		
 		if(dataType == "terms")
 			action = "get_select2_terms_titles";
+		
+		if(dataType == "users")
+			action = "get_select2_users_titles";
 		
 		ajaxRequest(action, ajaxData, function(response){
 			
@@ -757,11 +753,13 @@ function UniteCreatorElementorEditorAdmin(){
 	 * occure on change of settings panel
 	 */
 	function onSettingsPanelInit(){
-				
+		
 		initSpecialSelects();
-										
+		
 		//init the post type selector if exists
 		postSelectOnLoad();
+		
+		g_objBody.trigger("uc_settings_panel_change");
 		
 	}
 	
@@ -1239,7 +1237,7 @@ function UniteCreatorElementorEditorAdmin(){
 	 * ajax request to unlimited plugin from the editor
 	 */
 	function ajaxRequest(action, data, funcSuccess, funcError){
-				
+		
 		if(!data)
 			var data = {};
 		
@@ -1555,6 +1553,8 @@ function UniteCreatorElementorEditorAdmin(){
 		
 		g_frontAPI.triggerEvent("open_widget_settings", window.ucLastElementorModel);
 		
+		
+		
 	}
 	
 	
@@ -1598,6 +1598,13 @@ function UniteCreatorElementorEditorAdmin(){
 					
 	}
 	
+	/**
+	 * ajax request
+	 */
+	this.ajaxRequest = function(action, ajaxData, response){
+		ajaxRequest(action, ajaxData, response);		
+	}
+
 	
 	/**
 	 * init front end interaction
@@ -1652,6 +1659,8 @@ function UniteCreatorElementorEditorAdmin(){
 	 * init the object
 	 */
 	this.init = function(){
+		
+		g_objBody = jQuery("body");
 		
 		g_objSettingsPanel = jQuery("#elementor-panel");
 		

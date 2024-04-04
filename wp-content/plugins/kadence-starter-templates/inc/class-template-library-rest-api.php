@@ -38,6 +38,10 @@ use function wp_remote_get;
 use function wp_remote_retrieve_body;
 use function wp_remote_retrieve_response_code;
 use function wp_get_attachment_url;
+use function wc_create_page;
+use function wc_get_product_object;
+use function wc_switch_to_site_locale;
+use function wc_get_page_id;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_license_domain;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_original_domain;
 use function KadenceWP\KadenceStarterTemplates\StellarWP\Uplink\get_license_key;
@@ -678,6 +682,18 @@ class Library_REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
+		register_rest_route(
+			$this->namespace,
+			'/process_images',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'process_images' ),
+					'permission_callback' => array( $this, 'get_items_permission_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+			)
+		);
 	}
 	/**
 	 * Retrieves a collection of objects.
@@ -708,29 +724,50 @@ class Library_REST_Controller extends WP_REST_Controller {
 	public function get_ai_base_sites( $request ) {
 		$this->get_license_keys();
 		$site_url = get_original_domain();
+		$reload   = $request->get_param( self::PROP_FORCE_RELOAD );
+
+		$identifier = 'ai-base-templates' . KADENCE_STARTER_TEMPLATES_VERSION;
+
+		if ( ! empty( $this->api_key ) ) {
+			$identifier .= '_' . $this->api_key;
+		}
+
+		// Check if we have a local file.
+		if ( ! $reload ) {
+			try {
+				return rest_ensure_response( $this->block_library_cache->get( $identifier ) );
+			} catch ( NotFoundException $e ) {
+			}
+		}
+
 		$args = array(
-			'key'   => $this->api_key,
+			'key'       => $this->api_key,
 			'site_url'  => $site_url,
+			'beta'      => defined( 'KADENCE_STARTER_TEMPLATES_BETA' ) && KADENCE_STARTER_TEMPLATES_BETA ? 'true' : 'false',
 		);
 		$api_url  = add_query_arg( $args, 'https://base.startertemplatecloud.com/wp-json/kadence-starter-base/v1/sites' );
 		// Get the response.
-		$response = wp_remote_get( $api_url );
+		$response = wp_safe_remote_get(
+			$api_url,
+			array(
+				'timeout' => 20,
+			)
+		);
 		// Early exit if there was an error.
 		if ( is_wp_error( $response ) || $this->is_response_code_error( $response ) ) {
-			return '';
+			return new WP_Error( 'getting_ai_sites_failed', __( 'Failed to get AI Templates' ), array( 'status' => 500 ) );
 		}
-
 		// Get the CSS from our response.
 		$contents = wp_remote_retrieve_body( $response );
 
 		// Early exit if there was an error.
 		if ( is_wp_error( $contents ) ) {
-			return '';
+			return new WP_Error( 'getting_ai_sites_failed', __( 'Failed to get AI Templates' ), array( 'status' => 500 ) );
 		}
 
-		return wp_send_json( $contents );
+		$this->block_library_cache->cache( $identifier, $contents );
 
-		die;
+		return rest_ensure_response( $contents );
 	}
 	/**
 	 * Retrieves remaining credits.
@@ -1102,7 +1139,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 			'key'    => $this->api_key,
 		);
 		$api_url  = $this->remote_ai_url . 'content/job/' . $job;
-		$response = wp_remote_get(
+		$response = wp_safe_remote_get(
 			$api_url,
 			array(
 				'timeout' => 20,
@@ -1168,6 +1205,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 		$body['mission'] = ! empty( $prophecy_data['missionStatement'] ) ? $prophecy_data['missionStatement'] : '';
 		$body['tone'] = ! empty( $prophecy_data['tone'] ) ? $prophecy_data['tone'] : '';
 		$body['keywords'] = ! empty( $prophecy_data['keywords'] ) ? $prophecy_data['keywords'] : '';
+		$body['lang'] = ! empty( $prophecy_data['lang'] ) ? $prophecy_data['lang'] : '';
 
 		switch ( $context ) {
 			case 'about':
@@ -1591,6 +1629,9 @@ class Library_REST_Controller extends WP_REST_Controller {
 		$install = true;
 		if ( ! empty( $plugins ) && is_array( $plugins ) ) {
 			$importer_plugins = $this->get_allowed_plugins();
+			if ( ! function_exists( 'request_filesystem_credentials' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
 			if ( ! function_exists( 'plugins_api' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 			}
@@ -1668,8 +1709,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 
 							// Use AJAX upgrader skin instead of plugin installer skin.
 							// ref: function wp_ajax_install_plugin().
-							$upgrader = new \Plugin_Upgrader( new \WP_Ajax_Upgrader_Skin() );
-
+							$upgrader = new Plugin_Upgrader( new WP_Ajax_Upgrader_Skin() );
 							$installed = $upgrader->install( $api->download_link );
 							if ( $installed ) {
 								$silent = ( 'give' === $base || 'elementor' === $base || 'fluentform' === $base || 'restrict-content' === $base ? false : true );
@@ -1846,7 +1886,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 */
 	public function get_remote_industry_verticals() {
 		$api_url  = $this->remote_ai_url . 'verticals';
-		$response = wp_remote_get(
+		$response = wp_safe_remote_get(
 			$api_url,
 			array(
 				'timeout' => 20,
@@ -1874,7 +1914,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 */
 	public function get_remote_image_collections() {
 		$api_url  = $this->remote_ai_url . 'images/collections';
-		$response = wp_remote_get(
+		$response = wp_safe_remote_get(
 			$api_url,
 			array(
 				'timeout' => 20,
@@ -1953,6 +1993,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 			'industry' => $parameters['industry'],
 			'location' => $parameters['location'],
 			'description' => $parameters['description'],
+			'lang' => ! empty( $parameters['lang'] ) ? $parameters['lang'] : '',
 			'count' => $parameters['count'],
 		);
 		$response = wp_remote_post(
@@ -1984,7 +2025,12 @@ class Library_REST_Controller extends WP_REST_Controller {
 	public function install_navigation( WP_REST_Request $request ) {
 		$site_id = $request->get_param( self::PROP_KEY );
 		$url = 'https://base.startertemplatecloud.com/' . $site_id . '/wp-json/kadence-starter-base/v1/navigation';
-		$response = wp_remote_get( $url );
+		$response = wp_safe_remote_get(
+			$url,
+			array(
+				'timeout' => 20,
+			)
+		);
 		// Early exit if there was an error.
 		if ( is_wp_error( $response ) || $this->is_response_code_error( $response ) ) {
 			return new WP_Error( 'install_failed', __( 'Could not get navigation from source.' ), array( 'status' => 500 ) );
@@ -2096,6 +2142,12 @@ class Library_REST_Controller extends WP_REST_Controller {
 			$locations[ $location_key ] = $menu_id;
 			set_theme_mod( 'nav_menu_locations', $locations );
 		}
+		// Make sure woocommerce pages are built and set.
+		if ( class_exists( 'WooCommerce' ) ) {
+			if ( is_callable( 'WC_Install::create_pages' ) ) {
+				WC_Install::create_pages();
+			}
+		}
 
 		return rest_ensure_response( 'updated' );
 	}
@@ -2152,7 +2204,12 @@ class Library_REST_Controller extends WP_REST_Controller {
 		$site_id = $request->get_param( self::PROP_KEY );
 		$site_name = $request->get_param( self::PROP_CONTEXT );
 		$url = 'https://base.startertemplatecloud.com/' . $site_id . '/wp-json/kadence-starter-base/v1/widgets';
-		$response = wp_remote_get( $url );
+		$response = wp_safe_remote_get(
+			$url,
+			array(
+				'timeout' => 20,
+			)
+		);
 		// Early exit if there was an error.
 		if ( is_wp_error( $response ) || $this->is_response_code_error( $response ) ) {
 			return new WP_Error( 'install_failed', __( 'Could not get widgets from source.' ), array( 'status' => 500 ) );
@@ -2356,7 +2413,12 @@ class Library_REST_Controller extends WP_REST_Controller {
 			return new WP_Error( 'instal_failed', __( 'No settings set.' ), array( 'status' => 500 ) );
 		}
 		$url = 'https://base.startertemplatecloud.com/' . $site_id . '/wp-json/kadence-starter-base/v1/settings';
-		$response = wp_remote_get( $url );
+		$response = wp_safe_remote_get(
+			$url,
+			array(
+				'timeout' => 20,
+			)
+		);
 		// Early exit if there was an error.
 		if ( is_wp_error( $response ) || $this->is_response_code_error( $response ) ) {
 			return new WP_Error( 'install_failed', __( 'Could not get settings from source.' ), array( 'status' => 500 ) );
@@ -2381,6 +2443,9 @@ class Library_REST_Controller extends WP_REST_Controller {
 		if ( isset( $settings['mods'] ) ) {
 			$data['mods'] = $this->process_options_images( $settings['mods'] );
 		}
+		if ( isset( $settings['wp_css'] ) ) {
+			$data['wp_css'] = $settings['wp_css'];
+		}
 		if ( isset( $settings['options'] ) ) {
 			$keys = array_keys( $settings['options'] );
 			$keys = array_map( 'sanitize_key', $keys );
@@ -2400,10 +2465,6 @@ class Library_REST_Controller extends WP_REST_Controller {
 			foreach ( $data['options'] as $option_key => $option_value ) {
 				update_option( $option_key, $option_value );
 			}
-		}
-		// If wp_css is set then import it.
-		if ( function_exists( 'wp_update_custom_css_post' ) && isset( $data['wp_css'] ) && '' !== $data['wp_css'] ) {
-			wp_update_custom_css_post( $data['wp_css'] );
 		}
 
 		// Loop through the mods.
@@ -2513,6 +2574,10 @@ class Library_REST_Controller extends WP_REST_Controller {
 					}
 				}
 			}
+		}
+		// If wp_css is set then import it.
+		if ( function_exists( 'wp_update_custom_css_post' ) && isset( $data['wp_css'] ) && '' !== $data['wp_css'] ) {
+			wp_update_custom_css_post( $data['wp_css'] );
 		}
 		if ( ! empty( $parameters['fonts'] ) ) {
 			$fonts = $parameters['fonts'];
@@ -2763,7 +2828,6 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 */
 	private function process_options_images( $mods ) {
 		foreach ( $mods as $key => $val ) {
-
 			if ( $this->is_image_url( $val ) ) {
 				$image = array(
 					'id'  => 0,
@@ -2811,7 +2875,12 @@ class Library_REST_Controller extends WP_REST_Controller {
 				break;
 		}
 		// Get the response.
-		$response = wp_remote_get( $url );
+		$response = wp_safe_remote_get(
+			$url,
+			array(
+				'timeout' => 20,
+			)
+		);
 		// Early exit if there was an error.
 		if ( is_wp_error( $response ) || $this->is_response_code_error( $response ) ) {
 			return new WP_Error( 'install_failed', __( 'Could not get posts from source.' ), array( 'status' => 500 ) );
@@ -2854,6 +2923,18 @@ class Library_REST_Controller extends WP_REST_Controller {
 					'url' => $post_data['image'],
 					'id'  => 0,
 				);
+				if ( strpos( $post_data['image'], 'images.pexels.com' ) !== false ) {
+					$image_data = $this->get_image_info( $image_library, $post_data['image'] );
+					if ( $image_data ) {
+						$alt                        = ! empty( $image_data['alt'] ) ? $image_data['alt'] : '';
+						$image['filename']          = ! empty( $image_data['filename'] ) ? $image_data['filename'] : $this->create_filename_from_alt( $alt );
+						$image['photographer']      = ! empty( $image_data['photographer'] ) ? $image_data['photographer'] : '';
+						$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
+						$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
+						$image['alt']               = $alt;
+						$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+					}
+				}
 				$downloaded_image = $this->import_image( $image );
 			}
 			$post_item = array(
@@ -2887,7 +2968,12 @@ class Library_REST_Controller extends WP_REST_Controller {
 				break;
 		}
 		// Get the response.
-		$response = wp_remote_get( $url );
+		$response = wp_safe_remote_get(
+			$url,
+			array(
+				'timeout' => 20,
+			)
+		);
 		// Early exit if there was an error.
 		if ( is_wp_error( $response ) || $this->is_response_code_error( $response ) ) {
 			return new WP_Error( 'install_failed', __( 'Could not get products from source.' ), array( 'status' => 500 ) );
@@ -2919,6 +3005,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 		}
 		$new_products = array();
 		$products         = $parameters['products'];
+		$image_library    = isset( $parameters['image_library'] ) ? $parameters['image_library'] : '';
 		foreach ( $products as $product_data ) {
 			if ( empty( $product_data['name'] ) ) {
 				continue;
@@ -2948,7 +3035,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 			}
 			$product->set_description( $product_data['description'] );
 			$product->set_short_description( $product_data['short_description'] );
-			$this->set_image_data( $product, $product_data );
+			$this->set_image_data( $product, $product_data, $image_library );
 			$this->set_category_data( $product, $product_data );
 			$this->set_attribute_data( $product, $product_data );
 
@@ -2979,7 +3066,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 					if ( ! empty( $variation_data['variation_description'] ) ) {
 						$variation->set_description( $variation_data['variation_description'] );
 					}
-					$this->set_image_data( $variation, $variation_data );
+					$this->set_image_data( $variation, $variation_data, $image_library );
 					$variation->set_attributes( $variation_data['attributes'] );
 					$variation_id = $variation->save();
 				}
@@ -2987,7 +3074,6 @@ class Library_REST_Controller extends WP_REST_Controller {
 			update_post_meta( $product_id, '_kadence_starter_templates_imported_post', true );
 			$new_products[] = $product_id;
 		}
-
 		if ( empty( $new_products ) ) {
 			return new WP_Error( 'install_failed', __( 'Install failed.' ), array( 'status' => 500 ) );
 		}
@@ -2999,13 +3085,25 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 * @param WC_Product $product Product instance.
 	 * @param array      $data    Item data.
 	 */
-	protected function set_image_data( &$product, $data ) {
+	protected function set_image_data( &$product, $data, $image_library ) {
 		// Image URLs need converting to IDs before inserting.
 		if ( ! empty( $data['image'][0]['src'] ) ) {
 			$image            = array(
 				'url' => $data['image'][0]['src'],
 				'id'  => 0,
 			);
+			if ( strpos( $image['url'], 'images.pexels.com' ) !== false ) {
+				$image_data = $this->get_image_info( $image_library, $image['url'] );
+				if ( $image_data ) {
+					$alt                        = ! empty( $image_data['alt'] ) ? $image_data['alt'] : '';
+					$image['filename']          = ! empty( $image_data['filename'] ) ? $image_data['filename'] : $this->create_filename_from_alt( $alt );
+					$image['photographer']      = ! empty( $image_data['photographer'] ) ? $image_data['photographer'] : '';
+					$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
+					$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
+					$image['alt']               = $alt;
+					$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+				}
+			}
 			$downloaded_image = $this->import_image( $image );
 			if ( ! empty( $downloaded_image['id'] ) ) {
 				$product->set_image_id( $downloaded_image['id'] );
@@ -3022,6 +3120,18 @@ class Library_REST_Controller extends WP_REST_Controller {
 						'url' => $single_image['src'],
 						'id'  => 0,
 					);
+					if ( strpos( $image['url'], 'images.pexels.com' ) !== false ) {
+						$image_data = $this->get_image_info( $image_library, $image['url'] );
+						if ( $image_data ) {
+							$alt                        = ! empty( $image_data['alt'] ) ? $image_data['alt'] : '';
+							$image['filename']          = ! empty( $image_data['filename'] ) ? $image_data['filename'] : $this->create_filename_from_alt( $alt );
+							$image['photographer']      = ! empty( $image_data['photographer'] ) ? $image_data['photographer'] : '';
+							$image['photographer_url']  = ! empty( $image_data['photographer_url'] ) ? $image_data['photographer_url'] : '';
+							$image['photograph_url']    = ! empty( $image_data['url'] ) ? $image_data['url'] : '';
+							$image['alt']               = $alt;
+							$image['title']             = __( 'Photo by', 'kadence-blocks' ) . ' ' . $image['photographer'];
+						}
+					}
 					$downloaded_image = $this->import_image( $image );
 					if ( ! empty( $downloaded_image['id'] ) ) {
 						$gallery_image_ids[] = $downloaded_image['id'];
@@ -3048,7 +3158,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 			'domain'          => $site_url,
 			'key'             => ! empty( $this->api_key ) ? $this->api_key : '',
 			'email'           => ! empty( $this->api_email ) ? $this->api_email : '',
-			'site_name'       => $site_name,
+			'site_name'       => sanitize_title( $site_name ),
 			'product_slug'    => apply_filters( 'kadence-blocks-auth-slug', 'kadence-blocks' ),
 			'product_version' => KADENCE_STARTER_TEMPLATES_VERSION,
 		];
@@ -3458,19 +3568,31 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 */
 	public function check_for_local_image( $image_data ) {
 		global $wpdb;
-
-		// Thanks BrainstormForce for this idea.
-		// Check if image is already local based on meta key and custom hex value.
-		$image_id = $wpdb->get_var(
-			$wpdb->prepare(
-				'SELECT `post_id` FROM `' . $wpdb->postmeta . '`
-					WHERE `meta_key` = \'_kadence_blocks_image_hash\'
-						AND `meta_value` = %s
-				;',
-				sha1( $image_data['url'] )
-			)
-		);
-		if ( $image_id ) {
+		$image_id = '';
+		if ( ! empty( $image_data['url'] ) && strpos( $image_data['url'], get_site_url() ) !== false ) {
+			$image_id = attachment_url_to_postid( $image_data['url'] );
+			if ( empty( $image_id ) ) {
+				// Get unsized version use Regular expression to find the pattern -numberxnumber
+				$pattern = "/-\d+x\d+/";
+				// Replace the pattern with an empty string.
+				$cleaned_url = preg_replace( $pattern, '', $image_data['url'] );
+				$image_id = attachment_url_to_postid( $cleaned_url );
+			}
+		}
+		if ( empty( $image_id ) ) {
+			// Thanks BrainstormForce for this idea.
+			// Check if image is already local based on meta key and custom hex value.
+			$image_id = $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT `post_id` FROM `' . $wpdb->postmeta . '`
+						WHERE `meta_key` = \'_kadence_blocks_image_hash\'
+							AND `meta_value` = %s
+					;',
+					sha1( $image_data['url'] )
+				)
+			);
+		}
+		if ( ! empty( $image_id ) ) {
 			$local_image = array(
 				'id'  => $image_id,
 				'url' => wp_get_attachment_url( $image_id ),
@@ -3587,7 +3709,7 @@ class Library_REST_Controller extends WP_REST_Controller {
 		if ( empty( $link ) ) {
 			return false;
 		}
-		if ( strpos( $link, 'images.pexels.com' ) !== false ) {
+		if ( strpos( $link, 'https://images.pexels.com' ) !== false ) {
 			return true;
 		}
 		return preg_match( '/^((https?:\/\/)|(www\.))([a-z0-9-].?)+(:[0-9]+)?\/[\w\-]+\.(jpg|png|gif|webp|jpeg)\/?$/i', $link );
@@ -3713,6 +3835,20 @@ class Library_REST_Controller extends WP_REST_Controller {
 			return $new_industries;
 		}
 		return array();
+	}
+	/**
+	 * Imports a collection of images.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return array<array{id: int, url: string}> A list of local or pexels images, where the ID is an attachment_id or pexels_id.
+	 * @throws InvalidArgumentException
+	 * @throws Throwable
+	 * @throws ImageDownloadException
+	 */
+	public function process_images( WP_REST_Request $request ): array {
+		$parameters = (array) $request->get_json_params();
+		return kadence_starter_templates()->get( Image_Downloader::class )->download( $parameters );
 	}
 	/**
 	 * Retrieves a collection of objects.
@@ -4050,7 +4186,12 @@ class Library_REST_Controller extends WP_REST_Controller {
 		);
 		// Get the response.
 		$api_url  = add_query_arg( $args, $this->remote_url );
-		$response = wp_remote_get( $api_url );
+		$response = wp_safe_remote_get(
+			$api_url,
+			array(
+				'timeout' => 20,
+			)
+		);
 		// Early exit if there was an error.
 		if ( is_wp_error( $response ) || $this->is_response_code_error( $response ) ) {
 			return '';
@@ -4097,14 +4238,9 @@ class Library_REST_Controller extends WP_REST_Controller {
 	 * @return string
 	 */
 	public function get_local_template_data_filename() {
-		$ktp_api = 'free';
-		if ( class_exists( 'Kadence_Theme_Pro' ) ) {
-			$ktp_data = get_option( 'ktp_api_manager' );
-			if ( $ktp_data && isset( $ktp_data['ktp_api_key'] ) && ! empty( $ktp_data['ktp_api_key'] ) ) {
-				$ktp_api = $ktp_data['ktp_api_key'];
-			} else if ( $ktp_data && isset( $ktp_data['ithemes_key'] ) && ! empty( $ktp_data['ithemes_key'] ) ) {
-				$ktp_api = $ktp_data['ithemes_key'];
-			}
+		$ktp_api = $this->get_current_license_key();
+		if ( empty( $ktp_api ) ) {
+			$ktp_api = 'free';
 		}
 		return md5( $this->get_base_url() . $this->get_base_path() . $this->template_type . KADENCE_STARTER_TEMPLATES_VERSION . $ktp_api );
 	}

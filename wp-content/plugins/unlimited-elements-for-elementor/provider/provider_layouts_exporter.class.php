@@ -37,8 +37,8 @@ class UniteCreatorLayoutsExporter extends UniteCreatorLayoutsExporterWork{
 		//get name
 		$name_parts = pathinfo($filename);
 		$name = trim( substr( $filename, 0, -(1 + strlen($name_parts['extension'])) ) );
-		
-		$name .= "_image";
+				
+		$extension = UniteFunctionsUC::getVal($name_parts, "extension");
 		
 		//get full url
 		$urlFull = HelperUC::URLtoFull($url);
@@ -55,7 +55,7 @@ class UniteCreatorLayoutsExporter extends UniteCreatorLayoutsExporterWork{
 						
 		
 		//get image title
-		$title = $name;
+		$title = "";
 		$excerpt = "";
 		
 		if ( 0 === strpos( $type, 'image/' ) && $image_meta = @wp_read_image_metadata( $filepath ) ) {

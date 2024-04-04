@@ -3,9 +3,9 @@ Contributors: elemntor
 Tags: page builder, editor, landing page, drag-and-drop, elementor, visual editor, wysiwyg, design, maintenance mode, coming soon, under construction, website builder, landing page builder, front-end builder
 Requires at least: 6.0
 Tested up to: 6.4
-Requires PHP: 7.3
-Stable tag: 3.18.3
-Beta tag: 3.18.0-beta4
+Requires PHP: 7.4
+Stable tag: 3.20.0
+Beta tag: 3.20.0-beta4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,13 +13,13 @@ The Elementor Website Builder has it all: drag and drop page builder, pixel perf
 
 == Description ==
 
-https://www.youtube.com/watch?v=lBu9TKg7dFM
+https://www.youtube.com/watch?v=le72grP_Q6k
 
 = THE #1 WEB CREATION PLATFORM, POWERING OVER 15M WEBSITES WORLDWIDE. =
 
 Elementor is the leading WordPress website builder that empowers you to successfully build professional, pixel-perfect websites. With an intuitive drag and drop interface, you get complete control to build any type of website,  without writing a single line of code.
 
-Revolutionize the way you build websites with [Elementor AI](https://go.elementor.com/elementor-ai/), a native AI integration built specifically for Elementor, that transforms the way you build websites by enabling you to create complete sections, original text, code, and images instantly.
+Revolutionize the way you build websites with [Elementor AI](https://go.elementor.com/wp-repo-description-tab-elementor-ai/), a native AI integration built specifically for Elementor, that transforms the way you build websites by enabling you to create complete sections, original text, code, and images instantly.
 
 Unlock all of Elementor’s features and elevate your website’s potential with [Elementor Pro](https://go.elementor.com/wp-repo-description-tab-elementor-pro-pro-features/).
 
@@ -84,6 +84,8 @@ To accelerate your workflow Elementor includes a multitude of workflow enhancing
 = FAST LOADING WEBSITES =
 Your website’s performance impacts your visitor’s experience and search result ranking. Therefore, Elementor continuously invests in improving performance and recently partnered with Google Chrome to identify more ways to optimize performance, without impacting design. Performance improving features include: reduced DOM output, improved media file loading, reduced CSS and JS files, lazy loading, faster font loading, optimize front-end asset loading, and more. To learn more, check out our [performance page](https://go.elementor.com/wp-repo-description-tab-performance-performance-page/).
 
+***Looking to boost your site's performance?** Meet the [Image Optimizer plugin](https://go.elementor.com/wp-repo-description-tab-elementor-io/) by Elementor: an easy-to-use WordPress plugin that effortlessly reduces image sizes without sacrificing quality. Compatible with popular formats like JPEG, PNG, WebP, and GIF, it ensures a visually stunning, high-speed website. Elevate your performance with Image Optimizer – [download now](https://wordpress.org/plugins/image-optimization/)!*
+
 = EMPLOYING ACCESSIBILITY BEST-PRACTICES =
 Elementor is built with accessibility in mind and offers tools and enhancements to help you provide a better experience for all users. These include HTML 5 semantic, full keyboard navigation menu, ongoing accessibility improvement of features, widget, and more.
 
@@ -144,6 +146,12 @@ More information could be found in our [Trust Center](https://go.elementor.com/t
 - If you have any more questions or need support, visit the support on the [Plugin’s forum](https://go.elementor.com/wp-repo-description-tab-wordpress-plugin-forum/). Elementor Pro users can also reach out to a dedicated support channel for premium 24/7 support.
 - For more information about Elementor and Elementor Pro features, visit [Elementor Website Builder](https://go.elementor.com/wp-repo-description-tab-homepage-elementor-website-builder/).
 
+= USE OF 3RD PARTY SERVICES =
+To improve the user experience, Elementor may use the following 3rd party services if the required feature is enabled:
+
+- Google Fonts – are loaded to add additional fonts to your website. Google’s [TOS](https://policies.google.com/terms) and [Privacy Policy](https://policies.google.com/privacy)
+- Some Elementor features require loading additional assets from Elementor.com. These assets are not used for tracking purposes unless it’s explicitly mentioned otherwise, in which case you would need to approve it and manually opt-in. Learn more about our [TOS](https://go.elementor.com/wp-repo-description-tab-elementor-plugin-terms/) and [Privacy Policy](https://go.elementor.com/wp-repo-description-tab-elementor-plugin-privacy/).
+
 = Liked Elementor? =
 - Join our [Facebook Group](https://go.elementor.com/wp-repo-description-tab-facebook-group/).
 - Learn from our tutorials on [YouTube Channel](https://go.elementor.com/wp-repo-description-tab-youtube-channel/).
@@ -154,12 +162,12 @@ More information could be found in our [Trust Center](https://go.elementor.com/t
 = Minimum Requirements =
 
 * WordPress 6.0 or greater
-* PHP version 7.3 or greater
+* PHP version 7.4 or greater
 * MySQL version 5.0 or greater
 
 = Recommended Requirements =
 
-* PHP version 7.4 or greater
+* PHP version 8.1 or greater
 * MySQL version 5.6 or greater
 * WordPress Memory limit of 64 MB or greater (128 MB or higher is preferred)
 
@@ -245,42 +253,47 @@ You can also add a new language via [translate.wordpress.org](https://go.element
 
 == Changelog ==
 
-= 3.18.3 - 2023-12-20 =
+= 3.20.0 - 2024-03-11 =
 
-* Fix: Modified control sanitization to enforce better security policies in Dynamic tags
-* Fix: Elementor Editor is slow when using Safari 17 and Firefox on macOS
-* Fix: Inner containers added to the top of the page when using AI Variations
-
-= 3.18.2 - 2023-12-08 =
-
-* Security Fix: Addressed security weaknesses in template upload mechanism
-
-= 3.18.1 - 2023-12-06 =
-
-* Fix: Improved code security enforcement in File Upload mechanism
-* Fix: Error appears on front when using various 3rd party plugins and Themes
-* Fix: Reverted Elementor Editor is slow when using Safari 17 and Firefox on macOS
-
-= 3.18.0 - 2023-12-04 =
-
-* New: Introducing Element Manager - Overview of all installed widgets on your site, allowing the deactivation of unused widgets for a personalized widget panel ([#9647](https://github.com/elementor/elementor/issues/9647))
-* New: Introducing Elementor AI for Text-Based Container Generation – Effortlessly generate uniquely designed containers by simply providing a single textual prompt
-* New: Introducing Elementor AI for Elementor-Based Container Variations – Customize your existing Elementor layouts by editing container content, images, fonts, colors, and icons
-* Tweak: Added support for Elementor AI Web-Based Container generation – Create containers by providing a specified URL to generate Elementor-compatible layouts
 * Tweak: Enanached TTFB metric by removing UI controls and some arguments from frontend loading for better site performance
-* Tweak: Implemented accessibility improvements in Progress Bar widget
-* Tweak: Added responsive control and size units to navigation size in Image Carousel widget
-* Tweak: Promoted Global Style Guide feature to a Stable status
-* Tweak: Activated Optimize Image Loading experiment by default for all sites
-* Tweak: Activated Optimized Gutenberg Loading experiment by default for all sites
-* Tweak: Activated Inline Font Icons experiment by default for new sites
-* Tweak: Renamed the 'Image Size' control into 'Image Resolution'
-* Tweak: Updated `eicons` library to v5.25.0
-* Tweak: Updated context menu UI
-* Fix: Elementor Editor is slow when using Safari 17 and Firefox on macOS ([#24260](https://github.com/elementor/elementor/issues/24260))
-* Fix: Locale with "comma" as decimal separator brakes generated CSS styles for decimal values ([#10992](https://github.com/elementor/elementor/issues/10992))
-* Fix: Changed Vimeo Background video player to transparent background player ([#16336](https://github.com/elementor/elementor/issues/16336))
-* Fix: Dynamic property creation is deprecated in container layout with PHP 8.2 ([#23830](https://github.com/elementor/elementor/issues/23830))
-* Fix: Ensure that the tab elements open correctly with a click in Tabs widget
+* Tweak: Resolved excessive DOM output when using Grid Container and Flexbox Container widgets
+* Tweak: Added X icon to Font Awesome icon library ([#23345](https://github.com/elementor/elementor/issues/23345))
+* Tweak: Added Threads icon to Font Awesome icon library ([#23345](https://github.com/elementor/elementor/issues/23345))
+* Tweak: Restricted HTML widget privileges to admin users only for enhanced security and control
+* Tweak: Introduced the capability for admin users to grant HTML widget usage permissions to non-admin users in the Role Manager
+* Tweak: Refined Editor's unit selection DOM output for better efficiency
+* Tweak: Implemented accessibility improvements in Dynamic Tags control
+* Tweak: Implemented accessibility improvements in widget panel sections
+* Tweak: Implemented accessibility improvements in Site Settings items
+* Tweak: Implemented accessibility improvements in the Elements panel keyboard accessible
+* Tweak: Implemented accessibility improvements in Color Picker control
+* Tweak: Implemented accessibility improvements in Site Settings header buttons
+* Tweak: Implemented accessibility improvements for actions in the History panel
+* Tweak: Implemented accessibility improvements for revisions in History panel
+* Tweak: Added semantic `<time>` wrapper for items in History panel
+* Tweak: Added semantic `<search>` wrapper to Widgets search
+* Tweak: Promoted Build with AI feature to Stable status
+* Tweak: Global Style Guide feature merged to version
+* Tweak: Promoted Inline Font Icons feature to Stable status
+* Tweak: Activated Grid Container feature by default for new sites
+* Tweak: Removed separator-none argument from all Editor controls
+* Tweak: Relocated Icon and Content Spacing controls to the Box section in Icon Box widget
+* Tweak: Relocated Image and Content Spacing controls to the Box section in Image Box widget
+* Tweak: Relocated Alignment control from Content tab to Style tab in Button widget
+* Tweak: Replaced Position select control with toggle control in Tabs widget
+* Tweak: Replaced Icon Position select control with toggle control in Button widget
+* Tweak: Hide the Border Radius control of Drop Cap in Text Editor widget
+* Tweak: Hide image controls when image is not selected in Image widget
+* Tweak: Removed `Size` control for new usage in Button Widget
+* Tweak: Replaced Dismiss Icon select control with toggle control in Alert widget
+* Tweak: Replaced Additional Options select controls with toggle controls in Image Carousel widget
+* Tweak: Added missing `title` attribute to the Editor preview iframe
+* Tweak: Added a new reference to the Extensions page from Add New Plugin screen
+* Tweak: Improved flexibility of the widget promotion area for better extendability and customization
+* Tweak: Implemented general improvements to i18n for enhanced global support
+* Tweak: Updated `eicons` library to v5.28.0
+* Tweak: Standardized section names across various Elementor widgets for uniformity and clarity
+* Fix: Compatability issues with various 3rd party plugins when Optimize Image Loading feature is activated ([#24226](https://github.com/elementor/elementor/issues/24226))
+* Fix: `install_compare()` in Experiments Manager throw an error in PHP 8.2+ if `get_installs_history()` returned an empty result
 
 [See changelog for all versions.](https://go.elementor.com/full-changelog/)

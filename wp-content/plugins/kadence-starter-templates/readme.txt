@@ -3,8 +3,8 @@ Contributors: britner
 Tags: templates, gutenberg
 Requires at least: 6.1
 Tested up to: 6.4
-Stable tag: 2.0.3
-Requires PHP: 7.0
+Stable tag: 2.0.9
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -124,6 +124,32 @@ assist you with verification, CVE assignment, and notify the
 developers of this plugin.
 
 == Changelog ==
+
+= 2.0.9 =
+* Update: Tweak how css is applied.
+* Update: Add Swedish to language options in AI wizard.
+* Update: Flow with check before importing.
+* Fix: Possible issue with woocommerce pages.
+
+= 2.0.8 =
+* Add: New language selection for AI wizard.
+* Fix: Issue with using custom images.
+
+= 2.0.7 =
+* Fix: Possible stuck in generate mode issue.
+* Fix: Sanitize site name.
+
+= 2.0.6 =
+* Update: AI template cache refresh.
+* Fix: Plugin view details.
+* Fix: Font issue on load.
+* Fix: Timeout issue.
+
+= 2.0.5 =
+* Fix: Possible issue installing plugins.
+
+= 2.0.4 =
+* Fix: Issue importing some classic pro starter templates.
 
 = 2.0.3 =
 * Fix: Issue importing custom customizer settings.
